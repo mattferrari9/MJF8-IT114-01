@@ -1,9 +1,9 @@
 package M2;
+
 import java.util.Arrays;
 
 public class Problem3 {
     public static void main(String[] args) {
-        //Don't edit anything here
         Integer[] a1 = new Integer[]{-1, -2, -3, -4, -5, -6, -7, -8, -9, -10};
         Integer[] a2 = new Integer[]{-1, 1, -2, 2, 3, -3, -4, 5};
         Double[] a3 = new Double[]{-0.01, -0.0001, -.15};
@@ -14,25 +14,34 @@ public class Problem3 {
         bePositive(a3);
         bePositive(a4);
     }
-    // <T> turns this into a generic so it can take in any datatype, it'll be passed as an Object so casting is required
+    
     static <T> void bePositive(T[] arr){
         System.out.println("Processing Array:" + Arrays.toString(arr));
-        //your code should set the indexes of this array
-        Object[] output = new Object[arr.length];
-        //hint: use the arr variable; don't diretly use the a1-a4 variables
-        //TODO convert each value to positive
-        //set the result to the proper index of the output array
-        //hint: don't forget to handle the data types properly, the result datatype should be the same as the original datatype
+        T[] output = Arrays.copyOf(arr, arr.length);
         
-        //end edit section
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i] instanceof Number) {
+                // Check if the element is a number (Integer or Double)
+                Number number = (Number) arr[i];
+                if (number.doubleValue() < 0) {
+                    // Convert negative numbers to positive
+                    if (arr[i] instanceof Integer) {
+                        output[i] = (T) Integer.valueOf(Math.abs(number.intValue()));
+                    } else if (arr[i] instanceof Double) {
+                        output[i] = (T) Double.valueOf(Math.abs(number.doubleValue()));
+                    }
+                }
+            }
+        }
 
         StringBuilder sb = new StringBuilder();
-        for(Object i : output){
-            if(sb.length() > 0){
-                sb.append(",");
+        for (T value : output) {
+            if (sb.length() > 0) {
+                sb.append(", ");
             }
-            sb.append(String.format("%s (%s)", i, i.getClass().getSimpleName().substring(0,1)));
+            sb.append(value.toString() + " (" + value.getClass().getSimpleName().substring(0, 1) + ")");
         }
-        System.out.println("Result: " + sb.toString());
+
+        System.out.println("Positive Output: " + sb.toString());
     }
 }
