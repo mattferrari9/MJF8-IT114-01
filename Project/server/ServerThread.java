@@ -160,6 +160,8 @@ public class ServerThread extends Thread {
         }
     }
 
+
+
     // end send methods
     @Override
     public void run() {
@@ -232,5 +234,8 @@ public class ServerThread extends Thread {
             logger.info("Client already closed");
         }
         logger.info("Thread cleanup() complete");
+    }
+
+    public void roll() {
     }
 }
