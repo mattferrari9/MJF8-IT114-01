@@ -105,7 +105,7 @@ public enum Server {
         for (int i = 0, l = rooms.size(); i < l; i++) {
             if (rooms.get(i).getName().equalsIgnoreCase(roomName)) {
                 return rooms.get(i);
-            }gi
+            }
         }
         return null;
     }
