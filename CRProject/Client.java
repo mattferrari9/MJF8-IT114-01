@@ -5,6 +5,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Scanner;
+import java.util.Random;
 
 public class Client {
 
@@ -96,6 +97,8 @@ public class Client {
         }
         return false;
     }
+
+    //
 
     /**
      * Controller for handling various text commands.
