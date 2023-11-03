@@ -8,7 +8,6 @@ import java.util.Scanner;
 import java.util.Random;
 
 public class Client {
-
     Socket server = null;
     ObjectOutputStream out = null;
     ObjectInputStream in = null;
