@@ -220,9 +220,6 @@ public class Client {
     private void processMessage(Payload p) {
         switch (p.getPayloadType()) {
             case CONNECT:
-                System.out.println(String.format("*%s %s*",
-                    p.getClientName(), 
-                    p.getMessage()));
             case DISCONNECT:
                 System.out.println(String.format("*%s %s*",
                         p.getClientName(),
