@@ -6,6 +6,7 @@ import java.util.List;
 public class Room implements AutoCloseable{
 	protected static Server server;// used to refer to accessible server functions
 	private String name;
+	private int faceValue;
 	private List<ServerThread> clients = new ArrayList<ServerThread>();
 	private boolean isRunning = false;
 	// Commands
@@ -15,6 +16,13 @@ public class Room implements AutoCloseable{
 	private final static String DISCONNECT = "disconnect";
 	private final static String LOGOUT = "logout";
 	private final static String LOGOFF = "logoff";
+	
+	/*
+	 * mjf8, 11/03/2023, 17:57
+	 */
+
+	private final static String ROLL = "roll";
+
 
 	public Room(String name) {
 		this.name = name;
@@ -99,6 +107,7 @@ public class Room implements AutoCloseable{
 				String command = comm2[0];
 				String roomName;
 				wasCommand = true;
+
 				switch (command) {
 					case CREATE_ROOM:
 						roomName = comm2[1];
@@ -113,12 +122,23 @@ public class Room implements AutoCloseable{
 					case LOGOFF:
 						Room.disconnectClient(client, this);
 						break;
+					
+					/*
+					* mjf8, 11/03/23, 18:18 
+					*/	
+
+					case ROLL:
+						int faceValue = rollDie();
+						Room.sendMessage(name + "rolled a " + faceValue);
 					default:
 						wasCommand = false;
 						break;
 				}
 
-			}
+				}
+
+				
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
