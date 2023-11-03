@@ -219,7 +219,10 @@ public class Client {
 
     private void processMessage(Payload p) {
         switch (p.getPayloadType()) {
-            case CONNECT:// for now connect,disconnect are all the same
+            case CONNECT:
+                System.out.println(String.format("*%s %s*",
+                    p.getClientName(), 
+                    p.getMessage()));
             case DISCONNECT:
                 System.out.println(String.format("*%s %s*",
                         p.getClientName(),
