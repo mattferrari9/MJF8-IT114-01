@@ -1,5 +1,7 @@
-package CRProject;
+package CRProject.testcode;
 import java.util.Random;
+
+import CRProject.ServerThread;
 
 public class testcode {
 
