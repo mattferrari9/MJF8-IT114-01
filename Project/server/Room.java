@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
-import HNS.common.Constants;
+import Project.common.Constants;
 
 public class Room implements AutoCloseable {
     // server is a singleton now so we don't need this

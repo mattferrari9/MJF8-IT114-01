@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.logging.Logger;
 
-import HNS.common.Constants;
+import Project.common.Constants;
 
 public enum Server {
     INSTANCE;

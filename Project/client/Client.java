@@ -11,10 +11,10 @@ import java.util.Scanner;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
-import HNS.common.Constants;
-import HNS.common.Payload;
-import HNS.common.PayloadType;
-import HNS.common.RoomResultPayload;
+import Project.common.Constants;
+import Project.common.Payload;
+import Project.common.PayloadType;
+import Project.common.RoomResultPayload;
 
 public enum Client {
     Instance;
