@@ -166,15 +166,21 @@ public class Room implements AutoCloseable{
 	}
 
 	/*
-	 * mjf8, 11/03/23, 21:39
-	 * Using Open AI GPT3.5 AI as a basic outline.
+	 * mjf8, 11/03/23, 21:39 || updated 11/03/23, 23:29
+	 * Using Open AI GPT3.5 AI as an outline.
 	 */
 
 	private int rollDie(int sides) {
-		return (int) (Math.random() * sides ) + 1;
+		if (sides <= 0) {
+			throw new IllegalArgumentException("Number of sides must be greater than 0");
+		}
+		return (int) (Math.random() * sides) + 1;
 	}
 
 	private int rollDice(int numberOfDice, int sides) {
+		if (numberOfDice <= 0 || sides <= 0) {
+			throw new IllegalArgumentException("Number of dice should be greater than 0");
+		}
 		int totalValue = 0;
 		for (int i = 0; i < numberOfDice; i++) {
 			totalValue += rollDie(sides);
