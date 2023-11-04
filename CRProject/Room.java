@@ -20,7 +20,7 @@ public class Room implements AutoCloseable{
 	/*
 	 * mjf8, 11/03/2023, 17:57
 	 */
-
+	@Deprecated
 	private final static String ROLL = "roll";
 
 
