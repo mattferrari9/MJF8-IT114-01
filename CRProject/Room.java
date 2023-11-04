@@ -167,6 +167,7 @@ public class Room implements AutoCloseable{
 
 	/*
 	 * mjf8, 11/03/23, 21:39
+	 * Using Open AI GPT3.5 AI as a basic outline.
 	 */
 
 	private int rollDie(int sides) {
