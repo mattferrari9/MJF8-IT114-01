@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public class Room implements AutoCloseable{
-	protected static Server server;// used to refer to accessible server functions
+	protected static Server server; // used to refer to accessible server functions
 	private String name;
 	private int faceValue;
 	private List<ServerThread> clients = new ArrayList<ServerThread>();
@@ -18,9 +18,9 @@ public class Room implements AutoCloseable{
 	private final static String LOGOFF = "logoff";
 	
 	/*
-	 * mjf8, 11/03/2023, 17:57
+	 * mjf8, 11/03/2023, 17:57 || updated mjf8, 11/3/23, 23:41
 	 */
-	@Deprecated
+	//@Deprecated
 	private final static String ROLL = "roll";
 
 
@@ -107,58 +107,51 @@ public class Room implements AutoCloseable{
 				String command = comm2[0];
 				String roomName;
 				wasCommand = true;
-
-				/*
-				 * mjf8, 11/03/23, 21:34
-				 */
-				// if (command.equalsIgnoreCase(ROLL)) {
-				// 	if(comm2.length == 2 && comm2[1].matches("\\d+")) {
-				// 		int sides = Integer.parseInt(comm2[1]);
-				// 		int faceValue = rollDie(sides);
-				// 		//client.broadcast(name + "rolled a die and got " + faceValue);
-				// 	} else {
-				// 		int numberOfDice = Integer.parseInt(dice[0]);
-				// 		int sides = Integer.parseInt(dice[1]);
-				// 		int totalValue = rollDice(numberOfDice, sides);
-				// 		//Room.sendMessage = (name + "rolled " + numberOfDice + " dice with " + sides + " sides, and got a total of " + totalValue);
-
-				// 	}
-
-				// 	}
-				// }
-
-				switch (command) {
-					case CREATE_ROOM:
-						roomName = comm2[1];
-						Room.createRoom(roomName, client);
-						break;
-					case JOIN_ROOM:
-						roomName = comm2[1];
-						Room.joinRoom(roomName, client);
-						break;
-					case DISCONNECT:
-					case LOGOUT:
-					case LOGOFF:
-						Room.disconnectClient(client, this);
-						break;
-					
-					/*
-					* mjf8, 11/03/23, 18:18 
-					*/	
-					// @Deprecated
-					// case ROLL:
-					// 	int faceValue = rollDie();
-					// 	Room.sendMessage(name + "rolled a " + faceValue);
-
-					default:
+	
+				if (command.equalsIgnoreCase(ROLL)) {
+					// Check for /roll # or /roll #d#
+					if (comm2.length == 2 && comm2[1].matches("\\d+")) {
+						int sides = Integer.parseInt(comm2[1]);
+						if (sides > 0) {
+							int faceValue = rollDie(sides); //check variable
+							//client.sendMessage(name + " rolled a " + faceValue);
+						} else {
+							//client.sendMessage("Number of sides must be greater than 0.");
+						}
+					} else if (comm2.length == 2 && comm2[1].matches("\\d+d\\d+")) {
+						String[] dice = comm2[1].split("d");
+						int numberOfDice = Integer.parseInt(dice[0]);
+						int sides = Integer.parseInt(dice[1]);
+						if (numberOfDice > 0 && sides > 0) {
+							int totalValue = rollDice(numberOfDice, sides); //check variable
+							//client.sendMessage(name + " rolled " + numberOfDice + "d" + sides + " and got a total of " + totalValue);
+						} else {
+							//client.sendMessage("Number of dice and sides must be greater than 0.");
+						}
+					} else {
 						wasCommand = false;
-						break;
+					}
+				} else {
+					switch (command) {
+						case CREATE_ROOM:
+							roomName = comm2[1];
+							Room.createRoom(roomName, client);
+							break;
+						case JOIN_ROOM:
+							roomName = comm2[1];
+							Room.joinRoom(roomName, client);
+							break;
+						case DISCONNECT:
+						case LOGOUT:
+						case LOGOFF:
+							Room.disconnectClient(client, this);
+							break;
+						default:
+							wasCommand = false;
+							break;
+					}
 				}
-
-				}
-
-				
-
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -169,6 +162,7 @@ public class Room implements AutoCloseable{
 	 * mjf8, 11/03/23, 21:39 || updated 11/03/23, 23:29
 	 * Using Open AI GPT3.5 AI as an outline.
 	 */
+	//Later, change syntax of the 'throw new' blocks so they are the same
 
 	private int rollDie(int sides) {
 		if (sides <= 0) {
