@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
+import F23Project.client.Client;
 import Project.common.Constants;
 
 public class Room implements AutoCloseable {
@@ -198,7 +199,6 @@ public class Room implements AutoCloseable {
 	 */
 	@Deprecated
 	protected static void roll (Client client, Room room) {
-		client.Roll()
 	}
     // end command helper methods
 

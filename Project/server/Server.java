@@ -15,7 +15,7 @@ import Project.common.Constants;
 public enum Server {
     INSTANCE;
 
-    int port = 3000;
+    int port = 3001;
     private static Logger logger = Logger.getLogger(Server.class.getName());
     private List<Room> rooms = new ArrayList<Room>();
     private Room lobby = null;// default room
@@ -32,7 +32,8 @@ public enum Server {
             Socket incoming_client = null;
             logger.info(String.format("Server is listening on port %s", port));
             isRunning = true;
-            // Room.server = this;//since server is a singleton now we don't need this
+
+            //Room.server = this;//since server is a singleton now we don't need this
             startQueueManager();
             // create a lobby on start
             lobby = new Room(Constants.LOBBY);
@@ -105,7 +106,7 @@ public enum Server {
         for (int i = 0, l = rooms.size(); i < l; i++) {
             if (rooms.get(i).getName().equalsIgnoreCase(roomName)) {
                 return rooms.get(i);
-            }gi
+            }
         }
         return null;
     }
