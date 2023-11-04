@@ -4,17 +4,17 @@ public class Die {
 
 	private int faceValue;
 	
-	//default constructor
+	
 	public Die() {
 		faceValue = 6;
 	}
 	
-	//non-default constructor
+	
 	public Die(int face) {
 		faceValue = face;
 	}
 	
-	//roll method
+	
 	public int roll() {
 		faceValue = (int)(Math.random()*6) + 1;
 		return faceValue;
