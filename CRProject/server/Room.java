@@ -18,10 +18,10 @@ public class Room implements AutoCloseable{
 	private final static String LOGOFF = "logoff";
 	
 	/*
-	 * mjf8, 11/03/2023, 17:57 || updated mjf8, 11/3/23, 23:41
+	 * mjf8, 11/03/2023, 17:57 || updated mjf8, 11/03/23, 23:41 || updated mjf8, 11/04/23, 12:21
 	 */
-	//@Deprecated
 	private final static String ROLL = "roll";
+	private final static String FLIP = "flip";
 
 
 	public Room(String name) {
@@ -108,6 +108,9 @@ public class Room implements AutoCloseable{
 				String roomName;
 				wasCommand = true;
 	
+				/*
+				 * mjf8, 11/04/23, 11:23
+				 */
 				if (command.equalsIgnoreCase(ROLL)) {
 					// Check for /roll # or /roll #d#
 					if (comm2.length == 2 && comm2[1].matches("\\d+")) {
@@ -159,10 +162,10 @@ public class Room implements AutoCloseable{
 	}
 
 	/*
-	 * mjf8, 11/03/23, 21:39 || updated 11/03/23, 23:29
+	 * mjf8, 11/03/23, 21:39 || updated 11/03/23, 23:29 || updated 11/04/23, 11:20
 	 * Using Open AI GPT3.5 AI as an outline.
 	 */
-	//Later, change syntax of the 'throw new' blocks so they are the same
+	
 
 	private int rollDie(int sides) {
 		if (sides <= 0) {
@@ -173,7 +176,7 @@ public class Room implements AutoCloseable{
 
 	private int rollDice(int numberOfDice, int sides) {
 		if (numberOfDice <= 0 || sides <= 0) {
-			throw new IllegalArgumentException("Number of dice should be greater than 0");
+			throw new IllegalArgumentException("Number of dice must be greater than 0");
 		}
 		int totalValue = 0;
 		for (int i = 0; i < numberOfDice; i++) {
