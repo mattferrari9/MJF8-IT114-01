@@ -1,11 +1,15 @@
-package CRProject;
+package CRProject.client;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Scanner;
-import java.util.Random;
+
+import CRProject.common.Payload;
+import CRProject.common.PayloadType;
+
+// import java.util.Random;
 
 public class Client {
     Socket server = null;

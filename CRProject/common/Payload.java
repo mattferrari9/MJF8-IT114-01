@@ -1,4 +1,4 @@
-package CRProject;
+package CRProject.common;
 import java.io.Serializable;
 public class Payload implements Serializable {
     //read https://www.baeldung.com/java-serial-version-uid

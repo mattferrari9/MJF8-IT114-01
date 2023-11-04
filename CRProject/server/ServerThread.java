@@ -1,9 +1,12 @@
-package CRProject;
+package CRProject.server;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+
+import CRProject.common.Payload;
+import CRProject.common.PayloadType;
 
 /**
  * A server-side representation of a single client
