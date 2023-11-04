@@ -108,6 +108,25 @@ public class Room implements AutoCloseable{
 				String roomName;
 				wasCommand = true;
 
+				/*
+				 * mjf8, 11/03/23, 21:34
+				 */
+				// if (command.equalsIgnoreCase(ROLL)) {
+				// 	if(comm2.length == 2 && comm2[1].matches("\\d+")) {
+				// 		int sides = Integer.parseInt(comm2[1]);
+				// 		int faceValue = rollDie(sides);
+				// 		//client.broadcast(name + "rolled a die and got " + faceValue);
+				// 	} else {
+				// 		int numberOfDice = Integer.parseInt(dice[0]);
+				// 		int sides = Integer.parseInt(dice[1]);
+				// 		int totalValue = rollDice(numberOfDice, sides);
+				// 		//Room.sendMessage = (name + "rolled " + numberOfDice + " dice with " + sides + " sides, and got a total of " + totalValue);
+
+				// 	}
+
+				// 	}
+				// }
+
 				switch (command) {
 					case CREATE_ROOM:
 						roomName = comm2[1];
@@ -126,10 +145,11 @@ public class Room implements AutoCloseable{
 					/*
 					* mjf8, 11/03/23, 18:18 
 					*/	
+					// @Deprecated
+					// case ROLL:
+					// 	int faceValue = rollDie();
+					// 	Room.sendMessage(name + "rolled a " + faceValue);
 
-					case ROLL:
-						int faceValue = rollDie();
-						Room.sendMessage(name + "rolled a " + faceValue);
 					default:
 						wasCommand = false;
 						break;
@@ -143,6 +163,22 @@ public class Room implements AutoCloseable{
 			e.printStackTrace();
 		}
 		return wasCommand;
+	}
+
+	/*
+	 * mjf8, 11/03/23, 21:39
+	 */
+
+	private int rollDie(int sides) {
+		return (int) (Math.random() * sides ) + 1;
+	}
+
+	private int rollDice(int numberOfDice, int sides) {
+		int totalValue = 0;
+		for (int i = 0; i < numberOfDice; i++) {
+			totalValue += rollDie(sides);
+		}
+		return totalValue;
 	}
 
 	// Command helper methods
