@@ -1,9 +1,10 @@
 package CRProject.server;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class Room implements AutoCloseable{
+public class Room implements AutoCloseable {
 	protected static Server server; // used to refer to accessible server functions
 	private String name;
 	private int faceValue;
@@ -16,13 +17,13 @@ public class Room implements AutoCloseable{
 	private final static String DISCONNECT = "disconnect";
 	private final static String LOGOUT = "logout";
 	private final static String LOGOFF = "logoff";
-	
+
 	/*
-	 * mjf8, 11/03/2023, 17:57 || updated mjf8, 11/03/23, 23:41 || updated mjf8, 11/04/23, 12:21
+	 * mjf8, 11/03/2023, 17:57 || updated mjf8, 11/03/23, 23:41 || updated mjf8,
+	 * 11/04/23, 12:21
 	 */
 	private final static String ROLL = "roll";
 	private final static String FLIP = "flip";
-
 
 	public Room(String name) {
 		this.name = name;
@@ -57,7 +58,7 @@ public class Room implements AutoCloseable{
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
-					//sendMessage(client, "joined the room " + getName());
+					// sendMessage(client, "joined the room " + getName());
 					sendConnectionStatus(client, true);
 				}
 			}.start();
@@ -73,7 +74,7 @@ public class Room implements AutoCloseable{
 		// we don't need to broadcast it to the server
 		// only to our own Room
 		if (clients.size() > 0) {
-			//sendMessage(client, "left the room");
+			// sendMessage(client, "left the room");
 			sendConnectionStatus(client, false);
 		}
 		checkClients();
@@ -107,57 +108,49 @@ public class Room implements AutoCloseable{
 				String command = comm2[0];
 				String roomName;
 				wasCommand = true;
-	
-				/*
-				 * mjf8, 11/04/23, 11:23
-				 */
-				if (command.equalsIgnoreCase(ROLL)) {
-					// Check for /roll # or /roll #d#
-					if (comm2.length == 2 && comm2[1].matches("\\d+")) {
-						int sides = Integer.parseInt(comm2[1]);
-						if (sides > 0) {
-							int faceValue = rollDie(sides); //check variable
-							//client.sendMessage(name + " rolled a " + faceValue);
-						} else {
-							//client.sendMessage("Number of sides must be greater than 0.");
+				switch (command) {
+					case CREATE_ROOM:
+						roomName = comm2[1];
+						Room.createRoom(roomName, client);
+						break;
+					case JOIN_ROOM:
+						roomName = comm2[1];
+						Room.joinRoom(roomName, client);
+						break;
+					case DISCONNECT:
+					case LOGOUT:
+					case LOGOFF:
+						Room.disconnectClient(client, this);
+						break;
+					case ROLL:
+						if (comm2.length == 2 && !comm2[1].contains("d")) {
+							int sides = Integer.parseInt(comm2[1]);
+							if (sides > 0) {
+								int faceValue = rollDie(sides); // check variable
+								sendMessage(client, " rolled a " + comm2[1] + " and got " + faceValue);
+							}
+						} else if (comm2.length == 2 && comm2[1].matches("\\d+d\\d+")) {
+							String[] dice = comm2[1].split("d");
+							int numberOfDice = Integer.parseInt(dice[0]);
+							int sides = Integer.parseInt(dice[1]);
+							if (numberOfDice > 0 && sides > 0) {
+								int totalValue = rollDice(numberOfDice, sides); // check variable
+								sendMessage(client, " rolled " + numberOfDice + " dice " + " and got " + totalValue); //check logic
+
+							} else {
+								wasCommand = false;
+							}
 						}
-					} else if (comm2.length == 2 && comm2[1].matches("\\d+d\\d+")) {
-						String[] dice = comm2[1].split("d");
-						int numberOfDice = Integer.parseInt(dice[0]);
-						int sides = Integer.parseInt(dice[1]);
-						if (numberOfDice > 0 && sides > 0) {
-							int totalValue = rollDice(numberOfDice, sides); //check variable
-							//client.sendMessage(name + " rolled " + numberOfDice + "d" + sides + " and got a total of " + totalValue);
-						} else {
-							//client.sendMessage("Number of dice and sides must be greater than 0.");
-						}
-					} else {
+						break;
+					default:
 						wasCommand = false;
-					}
-				} else {
-					switch (command) {
-						case CREATE_ROOM:
-							roomName = comm2[1];
-							Room.createRoom(roomName, client);
-							break;
-						case JOIN_ROOM:
-							roomName = comm2[1];
-							Room.joinRoom(roomName, client);
-							break;
-						case DISCONNECT:
-						case LOGOUT:
-						case LOGOFF:
-							Room.disconnectClient(client, this);
-							break;
-						default:
-							wasCommand = false;
-							break;
-					}
+						break;
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
 		return wasCommand;
 	}
 
@@ -165,7 +158,6 @@ public class Room implements AutoCloseable{
 	 * mjf8, 11/03/23, 21:39 || updated 11/03/23, 23:29 || updated 11/04/23, 11:20
 	 * Using Open AI GPT3.5 AI as an outline.
 	 */
-	
 
 	private int rollDie(int sides) {
 		if (sides <= 0) {
@@ -224,7 +216,7 @@ public class Room implements AutoCloseable{
 			// it was a command, don't broadcast
 			return;
 		}
-		
+
 		String from = (sender == null ? "Room" : sender.getClientName());
 		Iterator<ServerThread> iter = clients.iterator();
 		while (iter.hasNext()) {
@@ -235,7 +227,8 @@ public class Room implements AutoCloseable{
 			}
 		}
 	}
-	protected synchronized void sendConnectionStatus(ServerThread sender, boolean isConnected){
+
+	protected synchronized void sendConnectionStatus(ServerThread sender, boolean isConnected) {
 		Iterator<ServerThread> iter = clients.iterator();
 		while (iter.hasNext()) {
 			ServerThread client = iter.next();
@@ -245,16 +238,18 @@ public class Room implements AutoCloseable{
 			}
 		}
 	}
-	private void handleDisconnect(Iterator<ServerThread> iter, ServerThread client){
+
+	private void handleDisconnect(Iterator<ServerThread> iter, ServerThread client) {
 		iter.remove();
 		info("Removed client " + client.getId());
 		checkClients();
 		sendMessage(null, client.getId() + " disconnected");
 	}
+
 	public void close() {
 		server.removeRoom(this);
-		//NOTE: This will break all rooms
-		//be sure to remove/comment out server = null;
+		// NOTE: This will break all rooms
+		// be sure to remove/comment out server = null;
 		server = null;
 		isRunning = false;
 		clients = null;

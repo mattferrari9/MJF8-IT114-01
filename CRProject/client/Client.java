@@ -45,7 +45,7 @@ public class Client {
      * @param port
      * @return true if connection was successful
      */
-    private boolean connect(String address, int port) {
+    private boolean connect(String address, int port) { 
         try {
             server = new Socket(address, port);
             // channel to send to server
