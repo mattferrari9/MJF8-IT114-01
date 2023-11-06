@@ -3,6 +3,7 @@ package CRProject.server;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 public class Room implements AutoCloseable {
 	protected static Server server; // used to refer to accessible server functions
@@ -135,12 +136,17 @@ public class Room implements AutoCloseable {
 							int sides = Integer.parseInt(dice[1]);
 							if (numberOfDice > 0 && sides > 0) {
 								int totalValue = rollDice(numberOfDice, sides); // check variable
-								sendMessage(client, client + " rolled " + numberOfDice + " dice " + " and got " + totalValue); //check logic || updated mjf8, 11/06/23, 17:28
+								sendMessage(client, " rolled " + numberOfDice + " dice " + " and got " + totalValue); //check logic || updated mjf8, 11/06/23, 17:28
 
 							} else {
 								wasCommand = false;
 							}
 						}
+						break;
+					case FLIP:
+						if (comm2.length == 2 && comm2[1].equalsIgnoreCase("coin"));
+						String result = flipCoin();
+						sendMessage(client, " flipped a coin and got " + result);
 						break;
 					default:
 						wasCommand = false;
@@ -175,6 +181,16 @@ public class Room implements AutoCloseable {
 			totalValue += rollDie(sides);
 		}
 		return totalValue;
+	}
+/*
+ * mjf8, 11/06/23, 17:34
+ */
+
+	private String flipCoin() {
+		Random r = new Random();
+		boolean isHeads = r.nextBoolean();
+		return isHeads ? "Heads" : "Tails";
+
 	}
 
 	// Command helper methods
