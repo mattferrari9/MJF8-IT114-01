@@ -135,7 +135,7 @@ public class Room implements AutoCloseable {
 							int sides = Integer.parseInt(dice[1]);
 							if (numberOfDice > 0 && sides > 0) {
 								int totalValue = rollDice(numberOfDice, sides); // check variable
-								sendMessage(client, " rolled " + numberOfDice + " dice " + " and got " + totalValue); //check logic
+								sendMessage(client, client + " rolled " + numberOfDice + " dice " + " and got " + totalValue); //check logic || updated mjf8, 11/06/23, 17:28
 
 							} else {
 								wasCommand = false;
