@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 public class Room implements AutoCloseable {
-	protected static Server server; // used to refer to accessible server functions
+	protected static Server server;
 	private String name;
 	private int faceValue;
 	private List<ServerThread> clients = new ArrayList<ServerThread>();
@@ -23,6 +23,7 @@ public class Room implements AutoCloseable {
 	 * mjf8, 11/03/2023, 17:57 || updated mjf8, 11/03/23, 23:41 || updated mjf8,
 	 * 11/04/23, 12:21
 	 */
+	@Deprecated
 	private final static String ROLL = "roll";
 	private final static String FLIP = "flip";
 
@@ -123,7 +124,7 @@ public class Room implements AutoCloseable {
 					case LOGOFF:
 						Room.disconnectClient(client, this);
 						break;
-					case ROLL:
+					case ROLL: // fix issues with roll numbers (sendMessage is wrong).
 						if (comm2.length == 2 && !comm2[1].contains("d")) {
 							int sides = Integer.parseInt(comm2[1]);
 							if (sides > 0) {
@@ -229,6 +230,10 @@ public class Room implements AutoCloseable {
 	protected static String formatMessage(String message) {
 		message = message.replaceAll("\\*\\*(.*?)\\*\\*", "<b>$1</b>");
 		message = message.replaceAll("\\*(.*?)\\*", "<i>$1</i>");
+		message = message.replaceAll("_(.*?)_", "<u>$1</u>");
+		message = message.replaceAll("#r(.*?)#", "<font color=\"red\">$1</font>");
+		message = message.replaceAll("#b(.*?)#", "<font color=\"blue\">$1</font>");
+		message = message.replaceAll("#g(.*?)#", "<font color=\"green\">$1</font>");
 		return message;
 	}
 
