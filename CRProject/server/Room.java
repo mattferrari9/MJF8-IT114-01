@@ -8,7 +8,7 @@ import java.util.Random;
 public class Room implements AutoCloseable {
 	protected static Server server;
 	private String name;
-	private int faceValue;
+	private int faceValue; // check
 	private List<ServerThread> clients = new ArrayList<ServerThread>();
 	private boolean isRunning = false;
 	// Commands
@@ -19,6 +19,7 @@ public class Room implements AutoCloseable {
 	private final static String LOGOUT = "logout";
 	private final static String LOGOFF = "logoff";
 
+
 	/*
 	 * mjf8, 11/03/2023, 17:57 || updated mjf8, 11/03/23, 23:41 || updated mjf8,
 	 * 11/04/23, 12:21
@@ -26,6 +27,8 @@ public class Room implements AutoCloseable {
 	@Deprecated
 	private final static String ROLL = "roll";
 	private final static String FLIP = "flip";
+
+	private final static String COLOR_REGEX = "#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})";
 
 	public Room(String name) {
 		this.name = name;
@@ -223,7 +226,7 @@ public class Room implements AutoCloseable {
 	}
 	// end command helper methods
 	/*
-	 * mjf8, 11/06/23, 20:31
+	 * mjf8, 11/06/23, 20:31, updated 11/07/23, 09:27
 	 * Using GPT 3.5 Open AI for a basic outline and regex
 	 */
 
@@ -231,16 +234,18 @@ public class Room implements AutoCloseable {
 		message = message.replaceAll("\\*\\*(.*?)\\*\\*", "<b>$1</b>");
 		message = message.replaceAll("\\*(.*?)\\*", "<i>$1</i>");
 		message = message.replaceAll("_(.*?)_", "<u>$1</u>");
-		message = message.replaceAll("#r(.*?)#", "<font color=\"red\">$1</font>");
-		message = message.replaceAll("#b(.*?)#", "<font color=\"blue\">$1</font>");
-		message = message.replaceAll("#g(.*?)#", "<font color=\"green\">$1</font>");
+		message = message.replaceAll(COLOR_REGEX, "<font color=\"$0\">$0</font>");
+		
+		//message = message.replaceAll("#r(.*?)#", "<font color=\"red\">$1</font>");
+		//message = message.replaceAll("#b(.*?)#", "<font color=\"blue\">$1</font>");
+		//message = message.replaceAll("#g(.*?)#", "<font color=\"green\">$1</font>");
+
+
 		return message;
 	}
 
 	/***
-	 * Takes a sender and a message and broadcasts the message to all clients in
-	 * this room. Client is mostly passed for command purposes but we can also use
-	 * it to extract other client info.
+	 * Takes a sender and a mjb ent info.
 	 * 
 	 * @param sender  The client sending the message
 	 * @param message The message to broadcast inside the room
