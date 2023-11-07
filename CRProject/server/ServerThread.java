@@ -70,12 +70,13 @@ public class ServerThread extends Thread {
         p.setMessage(message);
         return send(p);
     }
-    //changes mjf8, 11/3/2023, 13:43
-    public boolean sendConnectionStatus(String who, boolean isConnected){
+
+    // changes mjf8, 11/3/2023, 13:43
+    public boolean sendConnectionStatus(String who, boolean isConnected) {
         Payload p = new Payload();
         p.setPayloadType(PayloadType.CONNECT);
         p.setClientName(who);
-        p.setMessage(isConnected?"connected":"disconnected");
+        p.setMessage(isConnected ? "connected" : "disconnected");
         return send(p);
     }
 
@@ -130,7 +131,7 @@ public class ServerThread extends Thread {
             case CONNECT:
                 setClientName(p.getClientName());
                 break;
-            case DISCONNECT://TBD
+            case DISCONNECT:// TBD
                 break;
             case MESSAGE:
                 if (currentRoom != null) {

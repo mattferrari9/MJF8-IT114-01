@@ -1,4 +1,5 @@
 package CRProject.server;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -68,7 +69,7 @@ public class Server {
      * @return true if reassign worked; false if new room doesn't exist
      */
     protected synchronized boolean joinRoom(String roomName, ServerThread client) {
-        Room newRoom = roomName.equalsIgnoreCase("lobby")?lobby:getRoom(roomName);
+        Room newRoom = roomName.equalsIgnoreCase("lobby") ? lobby : getRoom(roomName);
         Room oldRoom = client.getCurrentRoom();
         if (newRoom != null) {
             if (oldRoom != null) {
