@@ -221,6 +221,16 @@ public class Room implements AutoCloseable {
 		room.removeClient(client);
 	}
 	// end command helper methods
+	/*
+	 * mjf8, 11/06/23, 20:31
+	 * Using GPT 3.5 Open AI for a basic outline and regex
+	 */
+
+	protected static String formatMessage(String message) {
+		message = message.replaceAll("\\*\\*(.*?)\\*\\*", "<b>$1</b>");
+		message = message.replaceAll("\\*(.*?)\\*", "<i>$1</i>");
+		return message;
+	}
 
 	/***
 	 * Takes a sender and a message and broadcasts the message to all clients in
@@ -230,15 +240,20 @@ public class Room implements AutoCloseable {
 	 * @param sender  The client sending the message
 	 * @param message The message to broadcast inside the room
 	 */
+
+	/*
+	 * mjf8, 11/06/23, 22:33
+	 */
 	protected synchronized void sendMessage(ServerThread sender, String message) {
 		if (!isRunning) {
 			return;
 		}
 		info("Sending message to " + clients.size() + " clients");
 		if (sender != null && processCommands(message, sender)) {
-			// it was a command, don't broadcast
 			return;
 		}
+
+		message = formatMessage(message);
 
 		String from = (sender == null ? "Room" : sender.getClientName());
 		Iterator<ServerThread> iter = clients.iterator();
