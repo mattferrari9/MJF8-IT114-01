@@ -19,7 +19,6 @@ public class Room implements AutoCloseable {
 	private final static String LOGOUT = "logout";
 	private final static String LOGOFF = "logoff";
 
-
 	/*
 	 * mjf8, 11/03/2023, 17:57 || updated mjf8, 11/03/23, 23:41 || updated mjf8,
 	 * 11/04/23, 12:21
@@ -235,11 +234,10 @@ public class Room implements AutoCloseable {
 		message = message.replaceAll("\\*(.*?)\\*", "<i>$1</i>");
 		message = message.replaceAll("_(.*?)_", "<u>$1</u>");
 		message = message.replaceAll(COLOR_REGEX, "<font color=\"$0\">$0</font>");
-		
-		//message = message.replaceAll("#r(.*?)#", "<font color=\"red\">$1</font>");
-		//message = message.replaceAll("#b(.*?)#", "<font color=\"blue\">$1</font>");
-		//message = message.replaceAll("#g(.*?)#", "<font color=\"green\">$1</font>");
 
+		// message = message.replaceAll("#r(.*?)#", "<font color=\"red\">$1</font>");
+		// message = message.replaceAll("#b(.*?)#", "<font color=\"blue\">$1</font>");
+		// message = message.replaceAll("#g(.*?)#", "<font color=\"green\">$1</font>");
 
 		return message;
 	}
