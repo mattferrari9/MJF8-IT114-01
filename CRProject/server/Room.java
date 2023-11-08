@@ -209,6 +209,12 @@ public class Room implements AutoCloseable {
 	}
 
 	// Command helper methods
+
+	protected static void getRooms(String query, ServerThread client) {
+		String [] rooms = Server.INSTANCE.getRooms(query).toArray(new String[0]);
+		client.sendRoomsList(rooms,(rooms!=null&&rooms.length==0)?"No rooms found containing your query string":null);
+	}
+
 	protected static void createRoom(String roomName, ServerThread client) {
 		if (server.createNewRoom(roomName)) {
 			server.joinRoom(roomName, client);

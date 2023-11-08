@@ -20,7 +20,7 @@ public enum Client {
     ObjectOutputStream out = null;
     ObjectInputStream in = null;
     boolean isRunning = false;
-     private Thread fromServerThread;
+    private Thread fromServerThread;
     private String clientName = "";
     private static Logger logger = Logger.getLogger(Client.class.getName());
     private static IClientEvents events;
@@ -95,6 +95,11 @@ public enum Client {
         p.setClientName(clientName);
         send(p);
     }
+    public void sendDisconnect() throws IOException, NullPointerException {
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.DISCONNECT);
+        send(p);
+    }
 
     public void sendMessage(String message) throws IOException, NullPointerException {
         Payload p = new Payload();
@@ -107,7 +112,7 @@ public enum Client {
     // keep this private as utility methods should be the only Payload creators
     private void send(Payload p) throws IOException, NullPointerException {
         logger.log(Level.FINE, "Sending Payload: " + p);
-        out.writeObject(p);//TODO force throw each
+        out.writeObject(p);// TODO force throw each
         logger.log(Level.INFO, "Sent Payload: " + p);
     }
 
@@ -171,7 +176,7 @@ public enum Client {
                 events.onSyncClient(p.getClientId(), p.getClientName());
                 break;
             case GET_ROOMS:
-                events.onReceiveRoomList(((RoomResultPayload)p).getRooms(), p.getMessage());
+                events.onReceiveRoomList(((RoomResultPayload) p).getRooms(), p.getMessage());
                 break;
             case JOIN_ROOM:
                 events.onRoomJoin(p.getMessage());
