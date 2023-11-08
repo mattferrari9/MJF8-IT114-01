@@ -306,4 +306,8 @@ public class Room implements AutoCloseable {
 		isRunning = false;
 		clients = null;
 	}
+
+	public boolean isRunning() {
+		return false;
+	}
 }
