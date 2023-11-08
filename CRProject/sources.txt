@@ -3,4 +3,7 @@
 ./server/Server.java
 ./common/Payload.java
 ./common/PayloadType.java
+./common/Constants.java
 ./client/Client.java
+./client/IClientEvents.java
+./client/ClientUI.java

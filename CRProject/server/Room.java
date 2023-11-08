@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import Project.common.Constants;
 
 public class Room implements AutoCloseable {
 	protected static Server server;
@@ -18,6 +22,7 @@ public class Room implements AutoCloseable {
 	private final static String DISCONNECT = "disconnect";
 	private final static String LOGOUT = "logout";
 	private final static String LOGOFF = "logoff";
+	private static Logger logger = Logger.getLogger(Room.class.getName());
 
 	/*
 	 * mjf8, 11/03/2023, 17:57 || updated mjf8, 11/03/23, 23:41 || updated mjf8,
@@ -35,7 +40,7 @@ public class Room implements AutoCloseable {
 	}
 
 	private void info(String message) {
-		System.out.println(String.format("Room[%s]: %s", name, message));
+		logger.log(Level.INFO, String.format("Room[%s]: %s", name, message));
 	}
 
 	public String getName() {
@@ -214,7 +219,7 @@ public class Room implements AutoCloseable {
 
 	protected static void joinRoom(String roomName, ServerThread client) {
 		if (!server.joinRoom(roomName, client)) {
-			client.sendMessage("Server", String.format("Room %s doesn't exist", roomName));
+			client.SendMessage(Constants.DEFAULT_CLIENT_ID, String.format("Room %s doesn't exist", roomName));
 		}
 	}
 
