@@ -7,7 +7,7 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import Project.common.Constants;
+import CRProject.common.Constants;
 
 public class Room implements AutoCloseable {
 	protected static Server server;
@@ -213,13 +213,13 @@ public class Room implements AutoCloseable {
 		if (server.createNewRoom(roomName)) {
 			server.joinRoom(roomName, client);
 		} else {
-			client.sendMessage("Server", String.format("Room %s already exists", roomName));
+			client.sendMessage(Constants.DEFAULT_CLIENT_ID, String.format("Room %s already exists", roomName));
 		}
 	}
 
 	protected static void joinRoom(String roomName, ServerThread client) {
 		if (!server.joinRoom(roomName, client)) {
-			client.SendMessage(Constants.DEFAULT_CLIENT_ID, String.format("Room %s doesn't exist", roomName));
+			client.sendMessage(Constants.DEFAULT_CLIENT_ID, String.format("Room %s already exists", roomName));
 		}
 	}
 
@@ -268,7 +268,7 @@ public class Room implements AutoCloseable {
 
 		message = formatMessage(message);
 
-		String from = (sender == null ? "Room" : sender.getClientName());
+		long from = (sender == null) ? Constants.DEFAULT_CLIENT_ID : sender.getClientId();
 		Iterator<ServerThread> iter = clients.iterator();
 		while (iter.hasNext()) {
 			ServerThread client = iter.next();
@@ -283,7 +283,8 @@ public class Room implements AutoCloseable {
 		Iterator<ServerThread> iter = clients.iterator();
 		while (iter.hasNext()) {
 			ServerThread client = iter.next();
-			boolean messageSent = client.sendConnectionStatus(sender.getClientName(), isConnected);
+			boolean messageSent = client.sendConnectionStatus(sender.getClientId(), sender.getClientName(),
+					isConnected); // new code
 			if (!messageSent) {
 				handleDisconnect(iter, client);
 			}
