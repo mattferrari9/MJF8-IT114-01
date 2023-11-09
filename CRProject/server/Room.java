@@ -233,15 +233,13 @@ public class Room implements AutoCloseable {
 		message = message.replaceAll("\\*\\*(.*?)\\*\\*", "<b>$1</b>");
 		message = message.replaceAll("\\*(.*?)\\*", "<i>$1</i>");
 		message = message.replaceAll("_(.*?)_", "<u>$1</u>");
-		message = message.replaceAll(COLOR_REGEX, "<font color=\"$0\">$0</font>");
-
-		// message = message.replaceAll("#r(.*?)#", "<font color=\"red\">$1</font>");
-		// message = message.replaceAll("#b(.*?)#", "<font color=\"blue\">$1</font>");
-		// message = message.replaceAll("#g(.*?)#", "<font color=\"green\">$1</font>");
+		message = message.replaceAll("#r(.*?)#", "<font color=\"red\">$1</font>");
+		message = message.replaceAll("#b(.*?)#", "<font color=\"blue\">$1</font>");
+		message = message.replaceAll("#g(.*?)#", "<font color=\"green\">$1</font>");
 
 		return message;
 	}
-
+	
 	/***
 	 * Takes a sender and a mjb ent info.
 	 * 
