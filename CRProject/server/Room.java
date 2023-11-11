@@ -360,10 +360,11 @@ public class Room implements AutoCloseable {
 		checkClients();
 		sendMessage(null, client.getId() + " disconnected");
 	}
-/**
- * Closes the room, removing it from the server and marking it as inactive.
- * Removes references to the server and clients, terminating the room.
- */
+
+	/**
+	 * Closes the room, removing it from the server and marking it as inactive.
+	 * Removes references to the server and clients, terminating the room.
+	 */
 	public void close() {
 		server.removeRoom(this);
 		// NOTE: This will break all rooms
