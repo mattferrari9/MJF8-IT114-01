@@ -10,6 +10,9 @@ import java.util.Scanner;
 import CRProject.common.Payload;
 import CRProject.common.PayloadType;
 
+/**
+ * JavaDoc was completed by ChatGPT by Open AI, powered by GPT 3.5
+ */
 public class Client {
     Socket server = null;
     ObjectOutputStream out = null;
@@ -92,7 +95,6 @@ public class Client {
      * <p>
      * Example format: localhost:3000
      * </p>
-     * https://www.w3schools.com/java/java_regex.asp
      * 
      * @param text
      * @return
@@ -389,6 +391,16 @@ public class Client {
         listenForKeyboard();
     }
 
+    /**
+     * Closes the various components and resources associated with the network
+     * connection.
+     * This method interrupts input threads, closes output and input streams, and
+     * closes the server connection.
+     * It handles exceptions for different operations, considering cases where
+     * resources might not have been opened.
+     * Note: It assumes that 'inputThread', 'fromServerThread', 'out', 'in', and
+     * 'server' are appropriately initialized.
+     */
     private void close() {
         try {
             inputThread.interrupt();
