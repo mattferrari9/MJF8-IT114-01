@@ -21,27 +21,48 @@ public class Room implements AutoCloseable {
 
 	/*
 	 * mjf8, 11/03/2023, 17:57 || updated mjf8, 11/03/23, 23:41 || updated mjf8,
-	 * 11/04/23, 12:21
+	 * 11/04/23, 12:21 || Deprecated 11/10/23, 23:34
 	 */
 	@Deprecated
 	private final static String ROLL = "roll";
 	private final static String FLIP = "flip";
 
+	@Deprecated
 	private final static String COLOR_REGEX = "#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})";
 
+	/**
+	 * Default constructor for Room
+	 * 
+	 * @param name
+	 */
 	public Room(String name) {
 		this.name = name;
 		isRunning = true;
 	}
 
+	/**
+	 * Logs one (1) informational message related to the specific Room.
+	 * 
+	 * @param message The information to be logged.
+	 */
 	private void info(String message) {
 		System.out.println(String.format("Room[%s]: %s", name, message));
 	}
 
+	/**
+	 * Getter method for variable name.
+	 * 
+	 * @return
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Adds a client to the current room.
+	 *
+	 * @param client The ServerThread representing the client to be added.
+	 */
 	protected synchronized void addClient(ServerThread client) {
 		if (!isRunning) {
 			return;
@@ -54,15 +75,11 @@ public class Room implements AutoCloseable {
 			new Thread() {
 				@Override
 				public void run() {
-					// slight delay to let potentially new client to finish
-					// binding input/output streams
-					// comment out the Thread.sleep to see what happens
 					try {
 						Thread.sleep(100);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
-					// sendMessage(client, "joined the room " + getName());
 					sendConnectionStatus(client, true);
 				}
 			}.start();
@@ -70,15 +87,17 @@ public class Room implements AutoCloseable {
 		}
 	}
 
+	/**
+	 * Removes a client from the room.
+	 *
+	 * @param client The ServerThread representing the client to be removed.
+	 */
 	protected synchronized void removeClient(ServerThread client) {
 		if (!isRunning) {
 			return;
 		}
 		clients.remove(client);
-		// we don't need to broadcast it to the server
-		// only to our own Room
 		if (clients.size() > 0) {
-			// sendMessage(client, "left the room");
 			sendConnectionStatus(client, false);
 		}
 		checkClients();
@@ -86,10 +105,10 @@ public class Room implements AutoCloseable {
 
 	/***
 	 * Checks the number of clients.
-	 * If zero, begins the cleanup process to dispose of the room
+	 * If zero, begins the cleanup process to dispose of the room.
+	 * If the room is not lobby only.
 	 */
 	private void checkClients() {
-		// Cleanup if room is empty and not lobby
 		if (!name.equalsIgnoreCase("lobby") && clients.size() == 0) {
 			close();
 		}
@@ -174,7 +193,14 @@ public class Room implements AutoCloseable {
 	 * mjf8, 11/03/23, 21:39 || updated 11/03/23, 23:29 || updated 11/04/23, 11:20
 	 * Using Open AI GPT3.5 AI as an outline.
 	 */
-
+	/**
+	 * Simulates the roll of a die with a specified number of sides.
+	 *
+	 * @param sides The number of sides on the die.
+	 * @return The result of the die roll.
+	 * @throws IllegalArgumentException if the number of sides is less than or equal
+	 *                                  to 0.
+	 */
 	private int rollDie(int sides) {
 		if (sides <= 0) {
 			throw new IllegalArgumentException("Number of sides must be greater than 0");
@@ -182,6 +208,16 @@ public class Room implements AutoCloseable {
 		return (int) (Math.random() * sides) + 1;
 	}
 
+	/**
+	 * Simulates rolling multiple dice with a specified number of sides.
+	 *
+	 * @param numberOfDice The number of dice to roll.
+	 * @param sides        The number of sides on each die.
+	 * @return The total value obtained by rolling the specified number of dice with
+	 *         the given number of sides.
+	 * @throws IllegalArgumentException if the number of dice or sides is less than
+	 *                                  or equal to 0.
+	 */
 	private int rollDice(int numberOfDice, int sides) {
 		if (numberOfDice <= 0 || sides <= 0) {
 			throw new IllegalArgumentException("Number of dice must be greater than 0");
@@ -239,7 +275,7 @@ public class Room implements AutoCloseable {
 
 		return message;
 	}
-	
+
 	/***
 	 * Takes a sender and a mjb ent info.
 	 * 
