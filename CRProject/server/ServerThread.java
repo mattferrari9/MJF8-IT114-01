@@ -98,6 +98,7 @@ public class ServerThread extends Thread {
         return send(payload);
     }
 
+
     public boolean sendExistingClient(long clientId, String clientName) {
         Payload p = new Payload();
         p.setPayloadType(PayloadType.SYNC_CLIENT);
