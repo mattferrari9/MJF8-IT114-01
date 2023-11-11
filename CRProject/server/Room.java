@@ -8,7 +8,6 @@ import java.util.Random;
 public class Room implements AutoCloseable {
 	protected static Server server;
 	private String name;
-	private int faceValue; // check
 	private List<ServerThread> clients = new ArrayList<ServerThread>();
 	private boolean isRunning = false;
 	// Commands
@@ -26,9 +25,6 @@ public class Room implements AutoCloseable {
 	@Deprecated
 	private final static String ROLL = "roll";
 	private final static String FLIP = "flip";
-
-	@Deprecated
-	private final static String COLOR_REGEX = "#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})";
 
 	/**
 	 * Default constructor for Room
@@ -158,14 +154,7 @@ public class Room implements AutoCloseable {
 							int sides = Integer.parseInt(dice[1]);
 							if (numberOfDice > 0 && sides > 0) {
 								int totalValue = rollDice(numberOfDice, sides); // check variable
-								sendMessage(client, " rolled " + numberOfDice + " dice " + " and got " + totalValue); // check
-																														// logic
-																														// ||
-																														// updated
-																														// mjf8,
-																														// 11/06/23,
-																														// 17:28
-
+								sendMessage(client, " rolled " + numberOfDice + " dice " + " and got " + totalValue);
 							} else {
 								wasCommand = false;
 							}

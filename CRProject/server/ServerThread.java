@@ -55,7 +55,7 @@ public class ServerThread extends Thread {
             info("Passed in room was null, this shouldn't happen");
         }
     }
-
+    
     public void disconnect() {
         info("Thread being disconnected by server");
         isRunning = false;
