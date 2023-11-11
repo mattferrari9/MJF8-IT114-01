@@ -1,6 +1,7 @@
 package CRProject.server;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -10,10 +11,9 @@ import java.util.logging.Logger;
 import CRProject.common.Constants;
 
 public class Room implements AutoCloseable {
-	protected static Server server;
 	private String name;
 	private int faceValue; // check
-	private List<ServerThread> clients = new ArrayList<ServerThread>();
+	private List<ServerThread> clients = Collections.synchronizedList(new ArrayList<ServerThread>());
 	private boolean isRunning = false;
 	// Commands
 	private final static String COMMAND_TRIGGER = "/";
@@ -216,16 +216,18 @@ public class Room implements AutoCloseable {
 	}
 
 	protected static void createRoom(String roomName, ServerThread client) {
-		if (server.createNewRoom(roomName)) {
-			server.joinRoom(roomName, client);
+		if (Server.INSTANCE.createNewRoom(roomName)) {
+			Room.joinRoom(roomName, client);
 		} else {
 			client.sendMessage(Constants.DEFAULT_CLIENT_ID, String.format("Room %s already exists", roomName));
+			client.sendRoomsList(null, String.format("Room %s already exists", roomName));
 		}
 	}
 
 	protected static void joinRoom(String roomName, ServerThread client) {
-		if (!server.joinRoom(roomName, client)) {
-			client.sendMessage(Constants.DEFAULT_CLIENT_ID, String.format("Room %s already exists", roomName));
+		if (!Server.INSTANCE.joinRoom(roomName, client)) {
+			client.sendMessage(Constants.DEFAULT_CLIENT_ID, String.format("Room %s doesn't exist", roomName));
+			client.sendRoomsList(null, String.format("Room %s doesn't exist", roomName));
 		}
 	}
 
@@ -297,23 +299,19 @@ public class Room implements AutoCloseable {
 		}
 	}
 
-	private void handleDisconnect(Iterator<ServerThread> iter, ServerThread client) {
-		iter.remove();
-		info("Removed client " + client.getId());
+	private synchronized void handleDisconnect(Iterator<ServerThread> iter, ServerThread client) {
+		if (iter != null) {
+			iter.remove();
+		}
+		info("Removed client " + client.getClientName());
 		checkClients();
-		sendMessage(null, client.getId() + " disconnected");
+		sendConnectionStatus(client, false);
+		// sendMessage(null, client.getClientName() + " disconnected");
 	}
 
 	public void close() {
-		server.removeRoom(this);
-		// NOTE: This will break all rooms
-		// be sure to remove/comment out server = null;
-		server = null;
+		Server.INSTANCE.removeRoom(this);
 		isRunning = false;
 		clients = null;
-	}
-
-	public boolean isRunning() {
-		return false;
 	}
 }
