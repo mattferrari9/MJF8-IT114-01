@@ -10,8 +10,6 @@ import java.util.Scanner;
 import CRProject.common.Payload;
 import CRProject.common.PayloadType;
 
-// import java.util.Random;
-
 public class Client {
     Socket server = null;
     ObjectOutputStream out = null;
