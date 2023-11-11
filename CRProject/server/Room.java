@@ -228,10 +228,15 @@ public class Room implements AutoCloseable {
 		}
 		return totalValue;
 	}
+
 	/*
 	 * mjf8, 11/06/23, 17:34
 	 */
-
+	/**
+	 * Simulates flipping a coin and returns the result.
+	 *
+	 * @return The result of the coin flip, either "Heads" or "Tails".
+	 */
 	private String flipCoin() {
 		Random r = new Random();
 		boolean isHeads = r.nextBoolean();
@@ -239,7 +244,14 @@ public class Room implements AutoCloseable {
 
 	}
 
-	// Command helper methods
+	/**
+	 * Creates a new room with the specified name and adds a client to it if the
+	 * room doesn't exist.
+	 * Notifies the client if the room already exists.
+	 *
+	 * @param roomName The name of the room to be created.
+	 * @param client   The ServerThread representing the client to add to the room.
+	 */
 	protected static void createRoom(String roomName, ServerThread client) {
 		if (server.createNewRoom(roomName)) {
 			server.joinRoom(roomName, client);
@@ -248,23 +260,43 @@ public class Room implements AutoCloseable {
 		}
 	}
 
+	/**
+	 * Adds a client to the specified room if the room exists. Notifies the client
+	 * if the room doesn't exist.
+	 *
+	 * @param roomName The name of the room to join.
+	 * @param client   The ServerThread representing the client to be added to the
+	 *                 room.
+	 */
 	protected static void joinRoom(String roomName, ServerThread client) {
 		if (!server.joinRoom(roomName, client)) {
 			client.sendMessage("Server", String.format("Room %s doesn't exist", roomName));
 		}
 	}
 
+	/**
+	 * Disconnects a client from a room, setting their current room to null and
+	 * disconnecting the client.
+	 *
+	 * @param client The ServerThread representing the client to be disconnected.
+	 * @param room   The Room from which the client is to be disconnected.
+	 */
 	protected static void disconnectClient(ServerThread client, Room room) {
 		client.setCurrentRoom(null);
 		client.disconnect();
 		room.removeClient(client);
 	}
-	// end command helper methods
+
 	/*
 	 * mjf8, 11/06/23, 20:31, updated 11/07/23, 09:27
 	 * Using GPT 3.5 Open AI for a basic outline and regex
 	 */
-
+	/**
+	 * Formats a message based on certain patterns to apply HTML formatting.
+	 *
+	 * @param message The message to be formatted.
+	 * @return The formatted message with HTML tags.
+	 */
 	protected static String formatMessage(String message) {
 		message = message.replaceAll("\\*\\*(.*?)\\*\\*", "<b>$1</b>");
 		message = message.replaceAll("\\*(.*?)\\*", "<i>$1</i>");
@@ -308,6 +340,13 @@ public class Room implements AutoCloseable {
 		}
 	}
 
+	/**
+	 * Sends a message to all clients in the room, processing commands and
+	 * formatting the message.
+	 *
+	 * @param sender  The ServerThread of the message sender.
+	 * @param message The message to be sent.
+	 */
 	protected synchronized void sendConnectionStatus(ServerThread sender, boolean isConnected) {
 		Iterator<ServerThread> iter = clients.iterator();
 		while (iter.hasNext()) {
@@ -319,13 +358,23 @@ public class Room implements AutoCloseable {
 		}
 	}
 
+	/**
+	 * Handles the disconnection of a client from the room, removing the client and
+	 * informing other clients about the disconnection.
+	 *
+	 * @param iter   Iterator of clients in the room.
+	 * @param client The ServerThread representing the client to be disconnected.
+	 */
 	private void handleDisconnect(Iterator<ServerThread> iter, ServerThread client) {
 		iter.remove();
 		info("Removed client " + client.getId());
 		checkClients();
 		sendMessage(null, client.getId() + " disconnected");
 	}
-
+/**
+ * Closes the room, removing it from the server and marking it as inactive.
+ * Removes references to the server and clients, terminating the room.
+ */
 	public void close() {
 		server.removeRoom(this);
 		// NOTE: This will break all rooms
