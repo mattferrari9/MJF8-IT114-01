@@ -1,10 +1,11 @@
-package Project.server;;
+package Project.server;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
+import F23Project.client.Client;
 import Project.common.Constants;
 
 public class Room implements AutoCloseable {
@@ -21,6 +22,13 @@ public class Room implements AutoCloseable {
     private final static String DISCONNECT = "disconnect";
     private final static String LOGOUT = "logout";
     private final static String LOGOFF = "logoff";
+	
+	/*
+	 * mjf8, 11/02/23, 22:06
+	 */
+	private final static String ROLL = "roll";
+	private final static String FLIP = "flip";
+
     private static Logger logger = Logger.getLogger(Room.class.getName());
 
     public Room(String name) {
@@ -124,6 +132,19 @@ public class Room implements AutoCloseable {
                         roomName = comm2[1];
                         Room.joinRoom(roomName, client);
                         break;
+					
+					//mjf8, 11/02/23, 22:10
+					case FLIP:
+						/*
+						 * need to figure out how to implement a coin here.
+						 */
+						break;
+					case ROLL:
+						/*
+						 * need to figure out how to implement a die here
+						 */
+						break;
+
                     case DISCONNECT:
                     case LOGOUT:
                     case LOGOFF:
@@ -172,6 +193,13 @@ public class Room implements AutoCloseable {
         client.disconnect();
         room.removeClient(client);
     }
+
+	/*
+	 * mjf8, 11/02/23, 22:15
+	 */
+	@Deprecated
+	protected static void roll (Client client, Room room) {
+	}
     // end command helper methods
 
     /***

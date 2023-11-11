@@ -209,6 +209,13 @@ public enum Client {
         out.writeObject(p);
     }
 
+    /*
+     * mjf8, 11/02/23, 22:14
+     */
+    protected void Roll(String message) throws IOException {
+        //Payload p = new Payload();
+    }
+
     // end send methods
     @Deprecated // remove in Milestone3
     private void listenForKeyboard() {
