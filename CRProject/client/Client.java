@@ -23,18 +23,37 @@ public class Client {
     private Thread fromServerThread;
     private String clientName = "";
 
+    /*
+     * Constructs a new client object.
+     * 
+     * Constructor initializes a new instance of the client class.
+     * When instantiated, prints an empty line to the standard output.
+     */
     public Client() {
         System.out.println("");
     }
 
+    /**
+     * Checks the connection status of the client to the server.
+     * 
+     * @return {@code true} if the client is connected to the server, {@code false}
+     *         otherwise.
+     * 
+     *         This method verifies the connection status between the client and the
+     *         server.
+     *         It examines whether the server object is not null and if the server's
+     *         connection is active,
+     *         not closed, and its input and output streams are not shut down.
+     * 
+     * @see Server#isConnected()
+     * @see Server#isClosed()
+     * @see Server#isInputShutdown()
+     * @see Server#isOutputShutdown()
+     */
     public boolean isConnected() {
         if (server == null) {
             return false;
         }
-        // https://stackoverflow.com/a/10241044
-        // Note: these check the client's end of the socket connect; therefore they
-        // don't really help determine
-        // if the server had a problem
         return server.isConnected() && !server.isClosed() && !server.isInputShutdown() && !server.isOutputShutdown();
 
     }
@@ -90,6 +109,23 @@ public class Client {
         return text.equalsIgnoreCase("/quit");
     }
 
+    /**
+     * Checks if the provided text signifies a quit command.
+     *
+     * @param text The text to be evaluated for a quit command.
+     * @return {@code true} if the text represents a quit command ("/quit"
+     *         case-insensitive), {@code false} otherwise.
+     *
+     *         This method examines whether the provided text matches the quit
+     *         command "/quit" (case-insensitive).
+     *         It returns true if the text indicates the intention to quit or exit a
+     *         command loop,
+     *         and false if it does not match the quit command.
+     *
+     * @param text The text to be evaluated for a quit command.
+     * @return {@code true} if the text represents a quit command ("/quit"
+     *         case-insensitive), {@code false} otherwise.
+     */
     private boolean isName(String text) {
         if (text.startsWith("/name")) {
             String[] parts = text.split(" ");
@@ -101,8 +137,6 @@ public class Client {
         }
         return false;
     }
-
-    //
 
     /**
      * Controller for handling various text commands.
@@ -119,9 +153,6 @@ public class Client {
                 System.out.println("You must set your name before you can connect via: /name your_name");
                 return true;
             }
-            // replaces multiple spaces with single space
-            // splits on the space after connect (gives us host and port)
-            // splits on : to get host as index 0 and port as index 1
             String[] parts = text.trim().replaceAll(" +", " ").split(" ")[1].split(":");
             connect(parts[0].trim(), Integer.parseInt(parts[1].trim()));
             return true;
@@ -134,7 +165,21 @@ public class Client {
         return false;
     }
 
-    // Send methods
+    /**
+     * Sends a connection request to the server.
+     *
+     * @throws IOException if an I/O error occurs while sending the connection
+     *                     request.
+     *
+     *                     This method constructs a Payload object representing a
+     *                     connection request.
+     *                     It sets the payload type as a connection request and
+     *                     includes the client's name.
+     *                     The constructed Payload object is sent to the output
+     *                     stream.
+     *
+     * @throws IOException if an I/O error occurs during the object transmission.
+     */
     private void sendConnect() throws IOException {
         Payload p = new Payload();
         p.setPayloadType(PayloadType.CONNECT);
@@ -142,6 +187,22 @@ public class Client {
         out.writeObject(p);
     }
 
+    /**
+     * Sends a message to the server.
+     *
+     * @param message The message to be sent to the server.
+     * @throws IOException if an I/O error occurs while sending the message.
+     *
+     *                     This method constructs a Payload object representing a
+     *                     message to be transmitted.
+     *                     It sets the payload type as a message and includes the
+     *                     provided message and the client's name.
+     *                     The constructed Payload object is sent to the output
+     *                     stream.
+     *
+     * @param message The message to be sent to the server.
+     * @throws IOException if an I/O error occurs during the object transmission.
+     */
     private void sendMessage(String message) throws IOException {
         Payload p = new Payload();
         p.setPayloadType(PayloadType.MESSAGE);
@@ -150,7 +211,30 @@ public class Client {
         out.writeObject(p);
     }
 
-    // end send methods
+    /**
+     * Initiates a thread to listen for input from the keyboard.
+     * 
+     * This method initializes a thread to monitor and process user input from the
+     * keyboard.
+     * It sets up a scanner to read input from the standard input (keyboard),
+     * processes commands,
+     * sends messages to the server if connected, and handles exceptions or
+     * disconnections.
+     * It continuously listens for input until the loop is exited or an error
+     * occurs.
+     * 
+     * When an input is received, it checks if it's a command or a message. If it's
+     * a message and the client
+     * is connected to the server, it sends the message. If not connected, it
+     * displays a message indicating
+     * the lack of a connection to the server.
+     * 
+     * If an exception occurs during the input processing or if the connection is
+     * dropped, it breaks the loop
+     * and triggers the closing of resources. The method is wrapped to catch and
+     * print any exceptions.
+     * The thread is started to begin monitoring input from the keyboard.
+     */
     private void listenForKeyboard() {
         inputThread = new Thread() {
             @Override
@@ -189,6 +273,30 @@ public class Client {
         inputThread.start();
     }
 
+    /**
+     * Initiates a thread to listen for incoming messages from the server.
+     * This method continuously listens for and processes payloads/messages received
+     * from the connected server.
+     * 
+     * The method operates within a separate thread, constantly checking the
+     * server's input stream for incoming payloads.
+     * It iterates through the loop while the server connection remains open and
+     * data is successfully received.
+     * 
+     * During the loop, it reads incoming Payload objects from the server's input
+     * stream, prints debug information
+     * related to the received payload, and processes the message through the
+     * 'processMessage' method.
+     * 
+     * Upon encountering exceptions during message reception or if the server
+     * connection is closed,
+     * the method handles the exception, prints relevant messages based on the error
+     * type, and performs cleanup.
+     * 
+     * After exiting the listening loop or encountering errors, it ensures proper
+     * closure of resources
+     * and finalizes the listening process for server input.
+     */
     private void listenForServerMessage() {
         fromServerThread = new Thread() {
             @Override
@@ -221,6 +329,27 @@ public class Client {
         fromServerThread.start();// start the thread
     }
 
+    /**
+     * Initiates a thread to listen for incoming messages from the server.
+     *
+     * This method sets up a thread to continuously listen for messages from the
+     * connected server.
+     * It reads incoming payloads from the server's input stream and processes the
+     * received messages.
+     * If the server connection is active and payloads are being received, they are
+     * printed for debugging
+     * and then passed for further processing via the 'processMessage' method.
+     * 
+     * If an exception occurs during the reception of server messages, it handles
+     * the exception appropriately,
+     * prints relevant information based on the type of error, and triggers the
+     * closing of resources.
+     * After exiting the listening loop or encountering an error, it ensures a
+     * graceful closure of resources.
+     * The method is wrapped to catch and print any exceptions.
+     * The thread is started to commence listening for incoming messages from the
+     * server.
+     */
     private void processMessage(Payload p) {
         switch (p.getPayloadType()) {
             case CONNECT:
@@ -240,6 +369,24 @@ public class Client {
         }
     }
 
+    /**
+     * Starts the client application by initiating keyboard input monitoring.
+     *
+     * @throws IOException if an I/O error occurs during the keyboard input
+     *                     monitoring setup.
+     *
+     *                     This method serves as the entry point to start the client
+     *                     application. It initiates the process by invoking
+     *                     the 'listenForKeyboard()' method, which sets up a thread
+     *                     to monitor user input from the keyboard.
+     *                     Any I/O-related errors encountered during the setup of
+     *                     keyboard input monitoring are handled by this method.
+     *                     Ensure the 'listenForKeyboard()' method is appropriately
+     *                     configured to manage user input for the application.
+     *
+     * @throws IOException if an I/O error occurs during the keyboard input
+     *                     monitoring setup.
+     */
     public void start() throws IOException {
         listenForKeyboard();
     }
@@ -284,11 +431,22 @@ public class Client {
         }
     }
 
+    /**
+     * Closes all resources associated with the client application.
+     * This method handles the graceful closure of various resources utilized by the
+     * client application.
+     * It interrupts the input and server message listening threads, closes the
+     * output and input streams,
+     * and finally, closes the server connection.
+     * Any exceptions encountered during the closing process are caught and
+     * appropriately handled.
+     * Ensure that this method is called when the client application needs to be
+     * shut down or resources released.
+     */
     public static void main(String[] args) {
         Client client = new Client();
 
         try {
-            // if start is private, it's valid here since this main is part of the class
             client.start();
         } catch (IOException e) {
             e.printStackTrace();
