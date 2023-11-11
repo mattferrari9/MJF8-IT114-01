@@ -12,7 +12,6 @@ import CRProject.common.Constants;
 
 public class Room implements AutoCloseable {
 	private String name;
-	private int faceValue; // check
 	private List<ServerThread> clients = Collections.synchronizedList(new ArrayList<ServerThread>());
 	private boolean isRunning = false;
 	// Commands
@@ -89,10 +88,6 @@ public class Room implements AutoCloseable {
 		checkClients();
 	}
 
-	/***
-	 * Checks the number of clients.
-	 * If zero, begins the cleanup process to dispose of the room
-	 */
 	private void checkClients() {
 		// Cleanup if room is empty and not lobby
 		if (!name.equalsIgnoreCase("lobby") && clients.size() == 0) {
@@ -100,12 +95,12 @@ public class Room implements AutoCloseable {
 		}
 	}
 
-	/***
-	 * Helper function to process messages to trigger different functionality.
+	/**
+	 * Processes incoming messages to identify and execute commands.
 	 * 
-	 * @param message The original message being sent
-	 * @param client  The sender of the message (since they'll be the ones
-	 *                triggering the actions)
+	 * @param message message recieved from the client
+	 * @param client  ServerThread associated with the client
+	 * @return boolean indicating if the message contained/executed a command
 	 */
 	private boolean processCommands(String message, ServerThread client) {
 		boolean wasCommand = false;
@@ -144,13 +139,7 @@ public class Room implements AutoCloseable {
 							int sides = Integer.parseInt(dice[1]);
 							if (numberOfDice > 0 && sides > 0) {
 								int totalValue = rollDice(numberOfDice, sides); // check variable
-								sendMessage(client, " rolled " + numberOfDice + " dice " + " and got " + totalValue); // check
-																														// logic
-																														// ||
-																														// updated
-																														// mjf8,
-																														// 11/06/23,
-																														// 17:28
+								sendMessage(client, " rolled " + numberOfDice + " dice " + " and got " + totalValue);
 
 							} else {
 								wasCommand = false;
@@ -179,7 +168,14 @@ public class Room implements AutoCloseable {
 	 * mjf8, 11/03/23, 21:39 || updated 11/03/23, 23:29 || updated 11/04/23, 11:20
 	 * Using Open AI GPT3.5 AI as an outline.
 	 */
-
+	/**
+	 * Simulates rolling a single die with a specificed number of sides.
+	 *
+	 * @param sides the number of sides on the die that will be "rolled".
+	 * @return an integer representing the result of the rolling die.
+	 * @throws IllegalArgumentException if the number of sides is less than or equal
+	 *                                  to 0;
+	 */
 	private int rollDie(int sides) {
 		if (sides <= 0) {
 			throw new IllegalArgumentException("Number of sides must be greater than 0");
@@ -187,6 +183,16 @@ public class Room implements AutoCloseable {
 		return (int) (Math.random() * sides) + 1;
 	}
 
+	/**
+	 * Simulates rolling multiple dice with a specified number of sides each.
+	 * 
+	 * @param numberOfDice the number of dice to roll.
+	 * @param sides        the number of sides on each die.
+	 * @return an integer representing the total value obtained by rolling the
+	 *         specified number of dice.
+	 * @throws IllegalArgumentException if the number of dice or sides is less than
+	 *                                  or equal to 0.
+	 */
 	private int rollDice(int numberOfDice, int sides) {
 		if (numberOfDice <= 0 || sides <= 0) {
 			throw new IllegalArgumentException("Number of dice must be greater than 0");
@@ -197,10 +203,16 @@ public class Room implements AutoCloseable {
 		}
 		return totalValue;
 	}
+
 	/*
 	 * mjf8, 11/06/23, 17:34
 	 */
-
+	/**
+	 * Simulates flipping of a coin and returns the result (heads or tails)
+	 * 
+	 * @return a string representing the result of the coin flip, either heads or
+	 *         tails
+	 */
 	private String flipCoin() {
 		Random r = new Random();
 		boolean isHeads = r.nextBoolean();
@@ -208,13 +220,29 @@ public class Room implements AutoCloseable {
 
 	}
 
-	// Command helper methods
-
+	/**
+	 * Retrieves a list of rooms based on a specified query and sends the list to
+	 * the associated client
+	 * 
+	 * @param query  the search query used to filter rooms
+	 * @param client the ServerThread associated with the client recieving the room
+	 *               list
+	 */
 	protected static void getRooms(String query, ServerThread client) {
-		String [] rooms = Server.INSTANCE.getRooms(query).toArray(new String[0]);
-		client.sendRoomsList(rooms,(rooms!=null&&rooms.length==0)?"No rooms found containing your query string":null);
+		String[] rooms = Server.INSTANCE.getRooms(query).toArray(new String[0]);
+		client.sendRoomsList(rooms,
+				(rooms != null && rooms.length == 0) ? "No rooms found containing your query string" : null);
 	}
 
+	/**
+	 * Creates a new room with the specified name and adds the client to the room if
+	 * successful.
+	 * Informs the client if the room already exists and sends appropriate messages.
+	 *
+	 * @param roomName The name of the room to be created.
+	 * @param client   The ServerThread associated with the client creating the
+	 *                 room.
+	 */
 	protected static void createRoom(String roomName, ServerThread client) {
 		if (Server.INSTANCE.createNewRoom(roomName)) {
 			Room.joinRoom(roomName, client);
@@ -224,6 +252,14 @@ public class Room implements AutoCloseable {
 		}
 	}
 
+	/**
+	 * Attempts to add a client to the specified room. Informs the client if the
+	 * room doesn't exist and sends appropriate messages.
+	 *
+	 * @param roomName The name of the room where the client intends to join.
+	 * @param client   The ServerThread associated with the client attempting to
+	 *                 join the room.
+	 */
 	protected static void joinRoom(String roomName, ServerThread client) {
 		if (!Server.INSTANCE.joinRoom(roomName, client)) {
 			client.sendMessage(Constants.DEFAULT_CLIENT_ID, String.format("Room %s doesn't exist", roomName));
@@ -231,17 +267,31 @@ public class Room implements AutoCloseable {
 		}
 	}
 
+	/**
+	 * Disconnects a client from a specified room, cleaning up its association and
+	 * disconnection from the server.
+	 *
+	 * @param client The ServerThread associated with the client to be disconnected.
+	 * @param room   The room from which the client is to be disconnected.
+	 */
 	protected static void disconnectClient(ServerThread client, Room room) {
 		client.setCurrentRoom(null);
 		client.disconnect();
 		room.removeClient(client);
 	}
-	// end command helper methods
+
 	/*
 	 * mjf8, 11/06/23, 20:31, updated 11/07/23, 09:27
 	 * Using GPT 3.5 Open AI for a basic outline and regex
 	 */
-
+	/**
+	 * Formats the input message by applying basic text formatting.
+	 *
+	 * @param message The message to be formatted, containing specified markers for
+	 *                bold, italic, underline, and color.
+	 * @return A string with applied HTML-like formatting for bold, italic,
+	 *         underline, and color based on specified markers.
+	 */
 	protected static String formatMessage(String message) {
 		message = message.replaceAll("\\*\\*(.*?)\\*\\*", "<b>$1</b>");
 		message = message.replaceAll("\\*(.*?)\\*", "<i>$1</i>");
@@ -255,15 +305,15 @@ public class Room implements AutoCloseable {
 		return message;
 	}
 
+	/*
+	 * mjf8, 11/06/23, 22:33
+	 */
+
 	/***
 	 * Takes a sender and a mjb ent info.
 	 * 
 	 * @param sender  The client sending the message
 	 * @param message The message to broadcast inside the room
-	 */
-
-	/*
-	 * mjf8, 11/06/23, 22:33
 	 */
 	protected synchronized void sendMessage(ServerThread sender, String message) {
 		if (!isRunning) {
@@ -287,6 +337,15 @@ public class Room implements AutoCloseable {
 		}
 	}
 
+	/**
+	 * Sends connection status updates to all clients, notifying about a specific
+	 * client's connection state.
+	 *
+	 * @param sender      The ServerThread representing the client for which the
+	 *                    connection status is being broadcast.
+	 * @param isConnected A boolean indicating the connection state (true for
+	 *                    connected, false for disconnected).
+	 */
 	protected synchronized void sendConnectionStatus(ServerThread sender, boolean isConnected) {
 		Iterator<ServerThread> iter = clients.iterator();
 		while (iter.hasNext()) {
@@ -299,6 +358,14 @@ public class Room implements AutoCloseable {
 		}
 	}
 
+	/**
+	 * Handles the disconnection of a client, performing necessary clean-up and
+	 * notification tasks.
+	 *
+	 * @param iter   An Iterator used to potentially remove the client from the
+	 *               clients list.
+	 * @param client The ServerThread representing the client to be disconnected.
+	 */
 	private synchronized void handleDisconnect(Iterator<ServerThread> iter, ServerThread client) {
 		if (iter != null) {
 			iter.remove();
