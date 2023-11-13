@@ -13,7 +13,7 @@ import CRProject.common.Constants;
 public class Room implements AutoCloseable {
 	private String name;
 	private List<ServerThread> clients = Collections.synchronizedList(new ArrayList<ServerThread>());
-	private boolean isRunning = false;
+	public boolean isRunning = false;
 	// Commands
 	private final static String COMMAND_TRIGGER = "/";
 	private final static String CREATE_ROOM = "createroom";
