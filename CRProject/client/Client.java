@@ -96,7 +96,7 @@ public enum Client {
 
     private void send(Payload p) throws IOException, NullPointerException {
         logger.log(Level.FINE, "Sending Payload: " + p);
-        out.writeObject(p);// TODO force throw each
+        out.writeObject(p);
         logger.log(Level.INFO, "Sent Payload: " + p);
     }
 

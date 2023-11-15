@@ -142,7 +142,7 @@ public class Room implements AutoCloseable {
 							int sides = Integer.parseInt(comm2[1]);
 							if (sides > 0) {
 								int faceValue = rollDie(sides); // check variable
-								sendMessage(client, " rolled 1 die with " + comm2[1] +  "sides and got " + faceValue);
+								sendMessage(client, " rolled 1 die with " + comm2[1] + "sides and got " + faceValue);
 							}
 						} else if (comm2.length == 2 && comm2[1].matches("\\d+d\\d+")) {
 							String[] dice = comm2[1].split("d");
@@ -278,7 +278,8 @@ public class Room implements AutoCloseable {
 	}
 
 	/***
-	 * Takes a sender and a message and broadcasts the message to all clients in
+	 * Takes a sender and a message and broadcasts the formatted message to all
+	 * clients in
 	 * this room. Client is mostly passed for command purposes but we can also use
 	 * it to extract other client info.
 	 * 
@@ -291,15 +292,15 @@ public class Room implements AutoCloseable {
 		}
 		info("Sending message to " + clients.size() + " clients");
 		if (sender != null && processCommands(message, sender)) {
-			// it was a command, don't broadcast
 			return;
 		}
 		long from = (sender == null) ? Constants.DEFAULT_CLIENT_ID : sender.getClientId();
+		String formattedMessage = formatMessage(message);
 		synchronized (clients) {
 			Iterator<ServerThread> iter = clients.iterator();
 			while (iter.hasNext()) {
 				ServerThread client = iter.next();
-				boolean messageSent = client.sendMessage(from, message);
+				boolean messageSent = client.sendMessage(from, formattedMessage);
 				if (!messageSent) {
 					handleDisconnect(iter, client);
 				}
