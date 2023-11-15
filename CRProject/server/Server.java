@@ -12,19 +12,25 @@ import java.util.Queue;
 public enum Server {
     INSTANCE;
     int port = 3001;
+    // connected clients
+    // private List<ServerThread> clients = new ArrayList<ServerThread>();
     private List<Room> rooms = new ArrayList<Room>();
-    private Room lobby = null;
+    private Room lobby = null;// default room
     private long nextClientId = 1;
+
     private Queue<ServerThread> incomingClients = new LinkedList<ServerThread>();
+    // https://www.geeksforgeeks.org/killing-threads-in-java/
     private volatile boolean isRunning = false;
 
     private void start(int port) {
         this.port = port;
+        // server listening
         try (ServerSocket serverSocket = new ServerSocket(port);) {
             Socket incoming_client = null;
             System.out.println("Server is listening on port " + port);
             isRunning = true;
             startQueueManager();
+            // create a lobby on start
             lobby = new Room("Lobby");
             rooms.add(lobby);
             do {
@@ -47,9 +53,15 @@ public enum Server {
     }
 
     void startQueueManager() {
+        // Queue manager thread to wait for the ServerThread thread to start
+        // before officially handing them off to a room and opening them for
+        // communication
         new Thread() {
             @Override
             public void run() {
+                // slight delay to let potentially new client to finish
+                // binding input/output streams
+                // comment out the Thread.sleep to see what happens
                 while (isRunning) {
                     try {
                         Thread.sleep(5);
@@ -59,6 +71,7 @@ public enum Server {
                     if (incomingClients.size() > 0) {
                         ServerThread ic = incomingClients.peek();
                         if (ic != null) {
+                            //wait for the thread to start and for the client to send the client name (username)
                             if (ic.isRunning() && ic.getClientName() != null) {
                                 handleIncomingClient(ic);
                                 incomingClients.poll();
@@ -71,24 +84,38 @@ public enum Server {
     }
 
     void handleIncomingClient(ServerThread client) {
-        client.setClientId(nextClientId);
-        client.sendClientId(nextClientId);
+        client.setClientId(nextClientId);// server reference
+        client.sendClientId(nextClientId);// client reference
         nextClientId++;
-        if (nextClientId < 0) {
+        if (nextClientId < 0) {// will use overflow to reset our counter
             nextClientId = 1;
         }
         joinRoom("lobby", client);
     }
 
+    /***
+     * Helper function to check if room exists by case insensitive name
+     * 
+     * @param roomName The name of the room to look for
+     * @return matched Room or null if not found
+     */
     private Room getRoom(String roomName) {
-        for (Room room : rooms) {
-            if (room.getName().equalsIgnoreCase(roomName)) {
-                return room;
+        for (int i = 0, l = rooms.size(); i < l; i++) {
+            if (rooms.get(i).getName().equalsIgnoreCase(roomName)) {
+                return rooms.get(i);
             }
         }
         return null;
     }
 
+    /***
+     * Attempts to join a room by name. Will remove client from old room and add
+     * them to the new room.
+     * 
+     * @param roomName The desired room to join
+     * @param client   The client moving rooms
+     * @return true if reassign worked; false if new room doesn't exist
+     */
     protected synchronized boolean joinRoom(String roomName, ServerThread client) {
         Room newRoom = roomName.equalsIgnoreCase("lobby") ? lobby : getRoom(roomName);
         Room oldRoom = client.getCurrentRoom();
@@ -105,8 +132,15 @@ public enum Server {
         return false;
     }
 
+    /***
+     * Attempts to create a room with given name if it doesn't exist already.
+     * 
+     * @param roomName The desired room to create
+     * @return true if it was created and false if it exists
+     */
     protected synchronized boolean createNewRoom(String roomName) {
         if (getRoom(roomName) != null) {
+            // TODO can't create room
             System.out.println(String.format("Room %s already exists", roomName));
             return false;
         } else {
@@ -116,18 +150,30 @@ public enum Server {
             return true;
         }
     }
-
-    protected synchronized List<String> getRooms(String query) {
+    /**
+     * Returns Rooms with names having a partial match with query.
+     * Hard coded to a limit of 10.
+     * @param query
+     * @return
+     */
+    protected synchronized List<String> getRooms(String query){
         return getRooms(query, 10);
     }
-
-    protected synchronized List<String> getRooms(String query, int limit) {
+    /**
+     * Returns Rooms with names having a partial match with query.
+     * @param query
+     * @param limit The maximum records to return
+     * @return
+     */
+    protected synchronized List<String> getRooms(String query, int limit){
         List<String> matchedRooms = new ArrayList<String>();
-        synchronized (rooms) {
-            for (Room room : rooms) {
-                if (room.isRunning() && room.getName().toLowerCase().contains(query.toLowerCase())) {
-                    matchedRooms.add(room.getName());
-                    if (matchedRooms.size() >= limit) {
+        synchronized(rooms){
+            Iterator<Room> iter = rooms.iterator();
+            while(iter.hasNext()){
+                Room r = iter.next();
+                if(r.isRunning() && r.getName().toLowerCase().contains(query.toLowerCase())){
+                    matchedRooms.add(r.getName());
+                    if(matchedRooms.size() >= limit){
                         break;
                     }
                 }
@@ -135,7 +181,6 @@ public enum Server {
         }
         return matchedRooms;
     }
-
     protected synchronized void removeRoom(Room r) {
         if (rooms.removeIf(room -> room == r)) {
             System.out.println("Removed empty room " + r.getName());
@@ -144,9 +189,13 @@ public enum Server {
 
     protected synchronized void broadcast(String message) {
         if (processCommand(message)) {
+
             return;
         }
-        for (Room room : rooms) {
+        // loop over rooms and send out the message
+        Iterator<Room> it = rooms.iterator();
+        while (it.hasNext()) {
+            Room room = it.next();
             if (room != null) {
                 room.sendMessage(null, message);
             }
@@ -155,11 +204,21 @@ public enum Server {
 
     private boolean processCommand(String message) {
         System.out.println("Checking command: " + message);
+        // TODO
         return false;
     }
 
     public static void main(String[] args) {
         System.out.println("Starting Server");
         Server server = Server.INSTANCE;
+        int port = 3000;
+        try {
+            port = Integer.parseInt(args[0]);
+        } catch (Exception e) {
+            // can ignore, will either be index out of bounds or type mismatch
+            // will default to the defined value prior to the try/catch
+        }
+        server.start(port);
+        System.out.println("Server Stopped");
     }
 }

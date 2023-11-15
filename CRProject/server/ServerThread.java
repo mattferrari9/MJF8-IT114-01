@@ -7,6 +7,8 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+//imports payload, payloat type, room result payload
+
 import CRProject.common.Payload;
 import CRProject.common.PayloadType;
 import CRProject.common.RoomResultPayload;
@@ -97,7 +99,6 @@ public class ServerThread extends Thread {
         }
         return send(payload);
     }
-
 
     public boolean sendExistingClient(long clientId, String clientName) {
         Payload p = new Payload();
@@ -198,6 +199,7 @@ public class ServerThread extends Thread {
                 if (currentRoom != null) {
                     currentRoom.sendMessage(this, p.getMessage());
                 } else {
+                    // TODO migrate to lobby
                     logger.log(Level.INFO, "Migrating to lobby on message with null room");
                     Room.joinRoom("lobby", this);
                 }

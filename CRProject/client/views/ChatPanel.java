@@ -89,7 +89,6 @@ public class ChatPanel extends JPanel {
                 }
             } catch (NullPointerException e) {
             } catch (IOException e1) {
-                // TODO Auto-generated catch block
                 e1.printStackTrace();
             }
         });
@@ -151,7 +150,7 @@ public class ChatPanel extends JPanel {
     public void addText(String text) {
         JPanel content = chatArea;
         // add message
-        JEditorPane textContainer = new JEditorPane("text/plain", text);
+        JEditorPane textContainer = new JEditorPane("text/html", text);
 
         // sizes the panel to attempt to take up the width of the container
         // and expand in height based on word wrapping

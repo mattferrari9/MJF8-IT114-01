@@ -8,11 +8,12 @@ import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+//imports payload, payload type, room result payload
+
 import CRProject.common.Payload;
 import CRProject.common.PayloadType;
 import CRProject.common.RoomResultPayload;
 
-//Enum Singleton: https://www.geeksforgeeks.org/advantages-and-disadvantages-of-using-enum-as-singleton-in-java/
 public enum Client {
     INSTANCE;
 
@@ -29,30 +30,17 @@ public enum Client {
         if (server == null) {
             return false;
         }
-        // https://stackoverflow.com/a/10241044
-        // Note: these check the client's end of the socket connect; therefore they
-        // don't really help determine
-        // if the server had a problem
+      
         return server.isConnected() && !server.isClosed() && !server.isInputShutdown() && !server.isOutputShutdown();
 
     }
 
-    /**
-     * Takes an ip address and a port to attempt a socket connection to a server.
-     * 
-     * @param address
-     * @param port
-     * @return true if connection was successful
-     */
     public boolean connect(String address, int port, String username, IClientEvents callback) {
-        // TODO validate
         this.clientName = username;
         Client.events = callback;
         try {
             server = new Socket(address, port);
-            // channel to send to server
             out = new ObjectOutputStream(server.getOutputStream());
-            // channel to listen to server
             in = new ObjectInputStream(server.getInputStream());
             logger.log(Level.INFO, "Client connected");
             listenForServerMessage();
@@ -65,9 +53,6 @@ public enum Client {
         return isConnected();
     }
 
-    // Send methods TODO add other utility methods for sending here
-    // NOTE: Can change this to protected or public if you plan to separate the
-    // sendConnect action and the socket handshake
     public void sendCreateRoom(String room) throws IOException, NullPointerException {
         Payload p = new Payload();
         p.setPayloadType(PayloadType.CREATE_ROOM);
@@ -109,14 +94,11 @@ public enum Client {
         send(p);
     }
 
-    // keep this private as utility methods should be the only Payload creators
     private void send(Payload p) throws IOException, NullPointerException {
         logger.log(Level.FINE, "Sending Payload: " + p);
         out.writeObject(p);// TODO force throw each
         logger.log(Level.INFO, "Sent Payload: " + p);
     }
-
-    // end send methods
 
     private void listenForServerMessage() {
         fromServerThread = new Thread() {
@@ -125,7 +107,6 @@ public enum Client {
                 try {
                     Payload fromServer;
                     logger.log(Level.INFO, "Listening for server messages");
-                    // while we're connected, listen for strings from server
                     while (!server.isClosed() && !server.isInputShutdown()
                             && (fromServer = (Payload) in.readObject()) != null) {
 
@@ -147,7 +128,7 @@ public enum Client {
                 }
             }
         };
-        fromServerThread.start();// start the thread
+        fromServerThread.start();
     }
 
     private void processPayload(Payload p) {
