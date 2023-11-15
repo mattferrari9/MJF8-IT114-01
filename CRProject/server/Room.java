@@ -142,7 +142,7 @@ public class Room implements AutoCloseable {
 							int sides = Integer.parseInt(comm2[1]);
 							if (sides > 0) {
 								int faceValue = rollDie(sides); // check variable
-								sendMessage(client, " rolled a " + comm2[1] + " and got " + faceValue);
+								sendMessage(client, " rolled 1 die with " + comm2[1] +  "sides and got " + faceValue);
 							}
 						} else if (comm2.length == 2 && comm2[1].matches("\\d+d\\d+")) {
 							String[] dice = comm2[1].split("d");
