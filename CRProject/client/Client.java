@@ -30,7 +30,7 @@ public enum Client {
         if (server == null) {
             return false;
         }
-      
+
         return server.isConnected() && !server.isClosed() && !server.isInputShutdown() && !server.isOutputShutdown();
 
     }
@@ -80,6 +80,7 @@ public enum Client {
         p.setClientName(clientName);
         send(p);
     }
+
     public void sendDisconnect() throws IOException, NullPointerException {
         Payload p = new Payload();
         p.setPayloadType(PayloadType.DISCONNECT);
@@ -90,6 +91,13 @@ public enum Client {
         Payload p = new Payload();
         p.setPayloadType(PayloadType.MESSAGE);
         p.setMessage(message);
+        p.setClientName(clientName);
+        send(p);
+    }
+
+    private void sendRoll() throws IOException, NullPointerException {
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.ROLL);
         p.setClientName(clientName);
         send(p);
     }

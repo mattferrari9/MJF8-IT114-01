@@ -138,6 +138,15 @@ public class ServerThread extends Thread {
         return send(p);
     }
 
+    /*
+     * mjf8, 11/16, 14:34
+     */
+    public boolean sendRoll(long clientId) {
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.ROLL);
+        return send(p);
+    }
+
     private boolean send(Payload payload) {
         // added a boolean so we can see if the send was successful
         try {
