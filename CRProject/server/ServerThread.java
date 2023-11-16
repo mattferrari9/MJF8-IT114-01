@@ -208,7 +208,6 @@ public class ServerThread extends Thread {
                 if (currentRoom != null) {
                     currentRoom.sendMessage(this, p.getMessage());
                 } else {
-                    // TODO migrate to lobby
                     logger.log(Level.INFO, "Migrating to lobby on message with null room");
                     Room.joinRoom("lobby", this);
                 }

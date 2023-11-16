@@ -95,13 +95,6 @@ public enum Client {
         send(p);
     }
 
-    private void sendRoll() throws IOException, NullPointerException {
-        Payload p = new Payload();
-        p.setPayloadType(PayloadType.ROLL);
-        p.setClientName(clientName);
-        send(p);
-    }
-
     private void send(Payload p) throws IOException, NullPointerException {
         logger.log(Level.FINE, "Sending Payload: " + p);
         out.writeObject(p);
