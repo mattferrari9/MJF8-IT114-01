@@ -150,7 +150,8 @@ public class Room implements AutoCloseable {
 							int sides = Integer.parseInt(dice[1]);
 							if (numberOfDice > 0 && sides > 0) {
 								int totalValue = rollDice(numberOfDice, sides); // check variable
-								sendMessage(client, " rolled " + numberOfDice + " dice " + " and got " + totalValue);
+								sendMessage(client, "<b>" + " rolled " + numberOfDice + " dice " + " and got "
+										+ totalValue + "</b>");
 
 							} else {
 								wasCommand = false;
@@ -161,7 +162,7 @@ public class Room implements AutoCloseable {
 						if (comm2.length == 2 && comm2[1].equalsIgnoreCase("coin"))
 							;
 						String result = flipCoin();
-						sendMessage(client, " flipped a coin and got " + result);
+						sendMessage(client, "<b>" + " flipped a coin and got " + result + " </b>");
 						break;
 					default:
 						wasCommand = false;
@@ -277,25 +278,47 @@ public class Room implements AutoCloseable {
 		return message;
 	}
 
-	/***
-	 * Takes a sender and a message and broadcasts the formatted message to all
-	 * clients in
-	 * this room. Client is mostly passed for command purposes but we can also use
-	 * it to extract other client info.
+	/**
 	 * 
-	 * @param sender  The client sending the message
-	 * @param message The message to broadcast inside the room
+	 * @param sender
+	 * @param message
 	 */
 	protected synchronized void sendMessage(ServerThread sender, String message) {
 		if (!isRunning) {
 			return;
 		}
+
 		info("Sending message to " + clients.size() + " clients");
+
 		if (sender != null && processCommands(message, sender)) {
 			return;
 		}
+
 		long from = (sender == null) ? Constants.DEFAULT_CLIENT_ID : sender.getClientId();
-		String formattedMessage = formatMessage(message);
+		String formattedMessage;
+
+		if (message.startsWith("@")) {
+			String[] parts = message.split(" ", 2);
+			String username = parts[0].substring(1);
+			String privateMessage = parts[1];
+
+			if (sender != null && sender.getClientName().equalsIgnoreCase(username)) {
+				formattedMessage = formatMessage(privateMessage);
+			} else {
+				ServerThread receiver = findClientByUsername(username);
+				if (receiver != null) {
+					formattedMessage = formatMessage(privateMessage);
+					sender.sendMessage(from, formattedMessage);
+					receiver.sendMessage(from, formattedMessage);
+					return;
+				} else {
+					formattedMessage = formatMessage(message);
+				}
+			}
+		} else {
+			formattedMessage = formatMessage(message);
+		}
+
 		synchronized (clients) {
 			Iterator<ServerThread> iter = clients.iterator();
 			while (iter.hasNext()) {
@@ -306,6 +329,18 @@ public class Room implements AutoCloseable {
 				}
 			}
 		}
+	}
+
+	// Helper method to find a client by username
+	private ServerThread findClientByUsername(String username) {
+		synchronized (clients) {
+			for (ServerThread client : clients) {
+				if (client.getClientName().equalsIgnoreCase(username)) {
+					return client;
+				}
+			}
+		}
+		return null; // Not found
 	}
 
 	protected synchronized void sendUserListToClient(ServerThread receiver) {
@@ -336,9 +371,6 @@ public class Room implements AutoCloseable {
 	}
 
 	protected synchronized void sendConnectionStatus(ServerThread sender, boolean isConnected) {
-		// converted to a backwards loop to help avoid concurrent list modification
-		// due to the recursive sendConnectionStatus()
-		// this should only be needed in this particular method due to the recusion
 		if (clients == null) {
 			return;
 		}
