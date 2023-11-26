@@ -20,6 +20,7 @@ public class ServerThread extends Thread {
     private Socket client;
     private String clientName;
     private boolean isRunning = false;
+    private boolean muted = false;
     private ObjectOutputStream out;// exposed here for send()
     // private Server server;// ref to our server so we can call methods on it
     // more easily
@@ -37,6 +38,18 @@ public class ServerThread extends Thread {
 
     public boolean isRunning() {
         return isRunning;
+    }
+
+    public void addMute() {
+        muted = true;
+    }
+
+    public void removeMute() {
+        muted = false;
+    }
+
+    public boolean isMuted() {
+        return muted;
     }
 
     private void info(String message) {

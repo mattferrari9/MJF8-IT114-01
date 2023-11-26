@@ -26,6 +26,8 @@ public class Room implements AutoCloseable {
 	private final static String LOGOFF = "logoff";
 	private final static String ROLL = "roll";
 	private final static String FLIP = "flip";
+	private final static String MUTE = "mute";
+	private final static String UNMUTE = "unmute";
 
 	private static Logger logger = Logger.getLogger(Room.class.getName());
 
@@ -164,6 +166,32 @@ public class Room implements AutoCloseable {
 						String result = flipCoin();
 						sendMessage(client, "<b>" + " flipped a coin and got " + result + " </b>");
 						break;
+						case MUTE:
+						if (comm2.length == 2) {
+							String targetUsername = comm2[1];
+							ServerThread targetUser = findClientByUsername(targetUsername);
+							if (targetUser != null) {
+								targetUser.addMute();
+								client.sendMessage(Constants.DEFAULT_CLIENT_ID, "You have muted " + targetUsername);
+								sendMessage(client, targetUsername + " has been muted in the room.");
+							} else {
+								client.sendMessage(Constants.DEFAULT_CLIENT_ID, "User " + targetUsername + " not found in the room.");
+							}
+						}
+						break;
+					case UNMUTE:
+						if (comm2.length == 2) {
+							String targetUsername = comm2[1];
+							ServerThread targetUser = findClientByUsername(targetUsername);
+							if (targetUser != null) {
+								targetUser.removeMute();
+								client.sendMessage(Constants.DEFAULT_CLIENT_ID, "You have unmuted " + targetUsername);
+								sendMessage(client, targetUsername + " has been unmuted in the room.");
+							} else {
+								client.sendMessage(Constants.DEFAULT_CLIENT_ID, "User " + targetUsername + " not found in the room.");
+							}
+						}
+						break;
 					default:
 						wasCommand = false;
 						break;
@@ -295,52 +323,35 @@ public class Room implements AutoCloseable {
 		}
 
 		long from = (sender == null) ? Constants.DEFAULT_CLIENT_ID : sender.getClientId();
-		String formattedMessage;
+
+		message = formatMessage(message);
 
 		if (message.startsWith("@")) {
 			String[] parts = message.split(" ", 2);
 			String username = parts[0].substring(1);
 			String privateMessage = parts[1];
 
-			if (sender != null && sender.getClientName().equalsIgnoreCase(username)) {
-				formattedMessage = formatMessage(privateMessage);
-			} else {
-				ServerThread receiver = findClientByUsername(username);
-				if (receiver != null) {
-					formattedMessage = formatMessage(privateMessage);
-					sender.sendMessage(from, formattedMessage);
-					receiver.sendMessage(from, formattedMessage);
-					return;
-				} else {
-					formattedMessage = formatMessage(message);
-				}
+			username = username.trim();
+
+			ServerThread receiver = findClientByUsername(username);
+
+			if (sender != null && receiver != null) {
+				sender.sendMessage(from, message);
+				receiver.sendMessage(from, message);
+				return;
 			}
-		} else {
-			formattedMessage = formatMessage(message);
 		}
 
 		synchronized (clients) {
 			Iterator<ServerThread> iter = clients.iterator();
 			while (iter.hasNext()) {
 				ServerThread client = iter.next();
-				boolean messageSent = client.sendMessage(from, formattedMessage);
+				boolean messageSent = client.sendMessage(from, message);
 				if (!messageSent) {
 					handleDisconnect(iter, client);
 				}
 			}
 		}
-	}
-
-	// Helper method to find a client by username
-	private ServerThread findClientByUsername(String username) {
-		synchronized (clients) {
-			for (ServerThread client : clients) {
-				if (client.getClientName().equalsIgnoreCase(username)) {
-					return client;
-				}
-			}
-		}
-		return null; // Not found
 	}
 
 	protected synchronized void sendUserListToClient(ServerThread receiver) {
@@ -353,7 +364,6 @@ public class Room implements AutoCloseable {
 				if (clientInRoom.getClientId() != receiver.getClientId()) {
 					boolean messageSent = receiver.sendExistingClient(clientInRoom.getClientId(),
 							clientInRoom.getClientName());
-					// receiver somehow disconnected mid iteration
 					if (!messageSent) {
 						handleDisconnect(null, receiver);
 						break;
@@ -361,6 +371,17 @@ public class Room implements AutoCloseable {
 				}
 			}
 		}
+	}
+
+	private ServerThread findClientByUsername(String username) {
+		synchronized (clients) {
+			for (ServerThread client : clients) {
+				if (client.getClientName().trim().equalsIgnoreCase(username.trim())) {
+					return client;
+				}
+			}
+		}
+		return null;
 	}
 
 	protected synchronized void sendRoomJoined(ServerThread receiver) {
