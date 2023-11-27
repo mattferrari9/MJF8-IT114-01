@@ -20,7 +20,7 @@ public class ServerThread extends Thread {
     private Socket client;
     private String clientName;
     private boolean isRunning = false;
-    private boolean muted = false;
+    private boolean isMuted = false;
     private ObjectOutputStream out;// exposed here for send()
     // private Server server;// ref to our server so we can call methods on it
     // more easily
@@ -40,16 +40,16 @@ public class ServerThread extends Thread {
         return isRunning;
     }
 
-    public void addMute() {
-        muted = true;
+    public synchronized void addMute() {
+        isMuted = true;
     }
-
-    public void removeMute() {
-        muted = false;
+    
+    public synchronized void removeMute() {
+        isMuted = false;
     }
-
-    public boolean isMuted() {
-        return muted;
+    
+    public synchronized boolean isMuted() {
+        return isMuted;
     }
 
     private void info(String message) {

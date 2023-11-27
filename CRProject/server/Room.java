@@ -144,7 +144,7 @@ public class Room implements AutoCloseable {
 							int sides = Integer.parseInt(comm2[1]);
 							if (sides > 0) {
 								int faceValue = rollDie(sides); // check variable
-								sendMessage(client, " rolled 1 die with " + comm2[1] + "sides and got " + faceValue);
+								sendMessage(client,"<b>" + " rolled 1 die with " + comm2[1] + "sides and got " + faceValue + "</b>");
 							}
 						} else if (comm2.length == 2 && comm2[1].matches("\\d+d\\d+")) {
 							String[] dice = comm2[1].split("d");
@@ -166,7 +166,7 @@ public class Room implements AutoCloseable {
 						String result = flipCoin();
 						sendMessage(client, "<b>" + " flipped a coin and got " + result + " </b>");
 						break;
-						case MUTE:
+					case MUTE:
 						if (comm2.length == 2) {
 							String targetUsername = comm2[1];
 							ServerThread targetUser = findClientByUsername(targetUsername);
@@ -175,7 +175,8 @@ public class Room implements AutoCloseable {
 								client.sendMessage(Constants.DEFAULT_CLIENT_ID, "You have muted " + targetUsername);
 								sendMessage(client, targetUsername + " has been muted in the room.");
 							} else {
-								client.sendMessage(Constants.DEFAULT_CLIENT_ID, "User " + targetUsername + " not found in the room.");
+								client.sendMessage(Constants.DEFAULT_CLIENT_ID,
+										"User " + targetUsername + " not found in the room.");
 							}
 						}
 						break;
@@ -188,7 +189,8 @@ public class Room implements AutoCloseable {
 								client.sendMessage(Constants.DEFAULT_CLIENT_ID, "You have unmuted " + targetUsername);
 								sendMessage(client, targetUsername + " has been unmuted in the room.");
 							} else {
-								client.sendMessage(Constants.DEFAULT_CLIENT_ID, "User " + targetUsername + " not found in the room.");
+								client.sendMessage(Constants.DEFAULT_CLIENT_ID,
+										"User " + targetUsername + " not found in the room.");
 							}
 						}
 						break;
