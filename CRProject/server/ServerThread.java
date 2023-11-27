@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,13 +22,14 @@ public class ServerThread extends Thread {
     private Socket client;
     private String clientName;
     private boolean isRunning = false;
-    private boolean isMuted = false;
     private ObjectOutputStream out;// exposed here for send()
     // private Server server;// ref to our server so we can call methods on it
     // more easily
     private Room currentRoom;
     private static Logger logger = Logger.getLogger(ServerThread.class.getName());
     private long myId;
+    private List<String> mutedUsers = new ArrayList<>();
+
 
     public void setClientId(long id) {
         myId = id;
@@ -40,16 +43,18 @@ public class ServerThread extends Thread {
         return isRunning;
     }
 
-    public synchronized void addMute() {
-        isMuted = true;
+    public synchronized void addMute(String username) {
+        if (!mutedUsers.contains(username)) {
+            mutedUsers.add(username);
+        }
     }
-    
-    public synchronized void removeMute() {
-        isMuted = false;
+
+    public synchronized void removeMute(String username) {
+        mutedUsers.remove(username);
     }
-    
-    public synchronized boolean isMuted() {
-        return isMuted;
+
+    public synchronized boolean isMuted(String username) {
+        return mutedUsers.contains(username);
     }
 
     private void info(String message) {
@@ -58,7 +63,6 @@ public class ServerThread extends Thread {
 
     public ServerThread(Socket myClient, Room room) {
         info("Thread created");
-        // get communication channels to single client
         this.client = myClient;
         this.currentRoom = room;
 

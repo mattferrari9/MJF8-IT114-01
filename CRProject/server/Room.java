@@ -144,7 +144,8 @@ public class Room implements AutoCloseable {
 							int sides = Integer.parseInt(comm2[1]);
 							if (sides > 0) {
 								int faceValue = rollDie(sides); // check variable
-								sendMessage(client,"<b>" + " rolled 1 die with " + comm2[1] + "sides and got " + faceValue + "</b>");
+								sendMessage(client, "<b>" + " rolled 1 die with " + comm2[1] + "sides and got "
+										+ faceValue + "</b>");
 							}
 						} else if (comm2.length == 2 && comm2[1].matches("\\d+d\\d+")) {
 							String[] dice = comm2[1].split("d");
@@ -166,46 +167,52 @@ public class Room implements AutoCloseable {
 						String result = flipCoin();
 						sendMessage(client, "<b>" + " flipped a coin and got " + result + " </b>");
 						break;
-					case MUTE:
-						if (comm2.length == 2) {
-							String targetUsername = comm2[1];
-							ServerThread targetUser = findClientByUsername(targetUsername);
-							if (targetUser != null) {
-								targetUser.addMute();
-								client.sendMessage(Constants.DEFAULT_CLIENT_ID, "You have muted " + targetUsername);
-								sendMessage(client, targetUsername + " has been muted in the room.");
-							} else {
-								client.sendMessage(Constants.DEFAULT_CLIENT_ID,
-										"User " + targetUsername + " not found in the room.");
-							}
-						}
-						break;
-					case UNMUTE:
-						if (comm2.length == 2) {
-							String targetUsername = comm2[1];
-							ServerThread targetUser = findClientByUsername(targetUsername);
-							if (targetUser != null) {
-								targetUser.removeMute();
-								client.sendMessage(Constants.DEFAULT_CLIENT_ID, "You have unmuted " + targetUsername);
-								sendMessage(client, targetUsername + " has been unmuted in the room.");
-							} else {
-								client.sendMessage(Constants.DEFAULT_CLIENT_ID,
-										"User " + targetUsername + " not found in the room.");
-							}
-						}
-						break;
-					default:
-						wasCommand = false;
-						break;
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+						case MUTE:
+                        if (comm2.length == 2) {
+                            String targetUsername = comm2[1];
+                            ServerThread targetUser = findClientByUsernameIgnoreCase(targetUsername);
+                            if (targetUser != null) {
+                                targetUser.addMute(targetUsername);
+                                client.sendMessage(Constants.DEFAULT_CLIENT_ID, "You have muted " + targetUsername);
+                                sendMessage(client, targetUsername + " has been muted in the room.");
+                            } else {
+                                client.sendMessage(Constants.DEFAULT_CLIENT_ID, "User " + targetUsername + " not found in the room.");
+                            }
+                        }
+                        break;
+                    
+                    case UNMUTE:
+                        if (comm2.length == 2) {
+                            String targetUsername = comm2[1];
+                            ServerThread targetUser = findClientByUsernameIgnoreCase(targetUsername);
+                            if (targetUser != null) {
+                                targetUser.removeMute(targetUsername);
+                                client.sendMessage(Constants.DEFAULT_CLIENT_ID, "You have unmuted " + targetUsername);
+                                sendMessage(client, targetUsername + " has been unmuted in the room.");
+                            } else {
+                                client.sendMessage(Constants.DEFAULT_CLIENT_ID, "User " + targetUsername + " not found in the room.");
+                            }
+                        }
+                        break;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-		return wasCommand;
-	}
+        return wasCommand;
+    }
 
+    private ServerThread findClientByUsernameIgnoreCase(String username) {
+        synchronized (clients) {
+            for (ServerThread client : clients) {
+                if (client.getClientName().trim().equalsIgnoreCase(username.trim())) {
+                    return client;
+                }
+            }
+        }
+        return null;
+    }
 	/**
 	 * Simulates rolling a single die with a specificed number of sides.
 	 *
@@ -275,6 +282,12 @@ public class Room implements AutoCloseable {
 		}
 	}
 
+	/**
+	 * Allows a client to join the room.
+	 * 
+	 * @param roomName Name of the room that the client has requested to join.
+	 * @param client   Client attempting to join the room.
+	 */
 	protected static void joinRoom(String roomName, ServerThread client) {
 		if (!Server.INSTANCE.joinRoom(roomName, client)) {
 			client.sendMessage(Constants.DEFAULT_CLIENT_ID, String.format("Room %s doesn't exist", roomName));
@@ -313,48 +326,54 @@ public class Room implements AutoCloseable {
 	 * @param sender
 	 * @param message
 	 */
-	protected synchronized void sendMessage(ServerThread sender, String message) {
-		if (!isRunning) {
-			return;
-		}
+    protected synchronized void sendMessage(ServerThread sender, String message) {
+        if (!isRunning) {
+            return;
+        }
 
-		info("Sending message to " + clients.size() + " clients");
+        info("Sending message to " + clients.size() + " clients");
 
-		if (sender != null && processCommands(message, sender)) {
-			return;
-		}
+        if (sender != null && processCommands(message, sender)) {
+            return;
+        }
 
-		long from = (sender == null) ? Constants.DEFAULT_CLIENT_ID : sender.getClientId();
+        long from = (sender == null) ? Constants.DEFAULT_CLIENT_ID : sender.getClientId();
 
-		message = formatMessage(message);
+        message = formatMessage(message);
 
-		if (message.startsWith("@")) {
-			String[] parts = message.split(" ", 2);
-			String username = parts[0].substring(1);
-			String privateMessage = parts[1];
+        if (message.startsWith("@")) {
+            String[] parts = message.split(" ", 2);
+            String username = parts[0].substring(1);
+            String privateMessage = parts[1];
 
-			username = username.trim();
+            username = username.trim();
 
-			ServerThread receiver = findClientByUsername(username);
+            ServerThread receiver = findClientByUsername(username);
 
-			if (sender != null && receiver != null) {
-				sender.sendMessage(from, message);
-				receiver.sendMessage(from, message);
-				return;
-			}
-		}
+            if (sender != null && receiver != null) {
+                sender.sendMessage(from, message);
+                receiver.sendMessage(from, message);
+                return;
+            }
+        }
 
-		synchronized (clients) {
-			Iterator<ServerThread> iter = clients.iterator();
-			while (iter.hasNext()) {
-				ServerThread client = iter.next();
-				boolean messageSent = client.sendMessage(from, message);
-				if (!messageSent) {
-					handleDisconnect(iter, client);
-				}
-			}
-		}
-	}
+       synchronized (clients) {
+            Iterator<ServerThread> iter = clients.iterator();
+            while (iter.hasNext()) {
+                ServerThread client = iter.next();
+
+                if (client.isMuted(message)) {
+                    continue;
+                }
+
+                boolean messageSent = client.sendMessage(from, message);
+                if (!messageSent) {
+                    handleDisconnect(iter, client);
+                }
+            } 
+        }
+    }
+
 
 	protected synchronized void sendUserListToClient(ServerThread receiver) {
 		logger.log(Level.INFO, String.format("Room[%s] Syncing client list of %s to %s", getName(), clients.size(),
