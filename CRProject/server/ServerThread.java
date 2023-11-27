@@ -22,9 +22,9 @@ public class ServerThread extends Thread {
     private Socket client;
     private String clientName;
     private boolean isRunning = false;
+
     private ObjectOutputStream out;// exposed here for send()
-    // private Server server;// ref to our server so we can call methods on it
-    // more easily
+    // private Server server;
     private Room currentRoom;
     private static Logger logger = Logger.getLogger(ServerThread.class.getName());
     private long myId;

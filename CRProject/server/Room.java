@@ -362,7 +362,7 @@ public class Room implements AutoCloseable {
             while (iter.hasNext()) {
                 ServerThread client = iter.next();
 
-                if (client.isMuted(message)) {
+                if (client.isMuted()) {
                     continue;
                 }
 
