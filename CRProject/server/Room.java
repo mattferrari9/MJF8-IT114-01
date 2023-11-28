@@ -172,7 +172,7 @@ public class Room implements AutoCloseable {
                             String targetUsername = comm2[1];
                             ServerThread targetUser = findClientByUsernameIgnoreCase(targetUsername);
                             if (targetUser != null) {
-                                targetUser.addMute(targetUsername);
+                                client.addMute(targetUsername);
                                 client.sendMessage(Constants.DEFAULT_CLIENT_ID, "You have muted " + targetUsername);
                                 sendMessage(client, targetUsername + " has been muted in the room.");
                             } else {
