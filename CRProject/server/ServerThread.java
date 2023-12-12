@@ -91,7 +91,7 @@ public class ServerThread extends Thread {
             info("Passed in room was null, this shouldn't happen");
         }
     }
-
+    
     public void disconnect() {
         sendConnectionStatus(myId, getClientName(), false);
         info("Thread being disconnected by server");
