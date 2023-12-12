@@ -1,7 +1,8 @@
 package CRProject.client;
 
 import java.awt.CardLayout;
-import java.awt.Component;
+import java.awt.Color;
+import java.awt.Component; // Import Component
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.ComponentAdapter;
@@ -26,32 +27,29 @@ import CRProject.client.views.UserInputPanel;
 import CRProject.common.Constants;
 
 public class ClientUI extends JFrame implements IClientEvents, ICardControls {
-    CardLayout card = null;// accessible so we can call next() and previous()
-    Container container;// accessible to be passed to card methods
-    String originalTitle = null;
+    CardLayout card;
+    Container container;
+    String originalTitle;
     private static Logger logger = Logger.getLogger(ClientUI.class.getName());
-    private JPanel currentCardPanel = null;
-    private Card currentCard = Card.CONNECT;
+    private JPanel currentCardPanel;
+    private Card currentCard;
 
-    private Hashtable<Long, String> userList = new Hashtable<Long, String>();
+    private Hashtable<Long, String> userList;
 
     private long myId = Constants.DEFAULT_CLIENT_ID;
     private JMenuBar menu;
-    // Panels
     private ConnectionPanel csPanel;
     private UserInputPanel inputPanel;
     private RoomsPanel roomsPanel;
     private ChatPanel chatPanel;
 
     public ClientUI(String title) {
-        super(title);// call the parent's constructor
+        super(title);
         originalTitle = title;
         container = getContentPane();
         container.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                // System.out.println("Resized to " + e.getComponent().getSize());
-                // rough concepts for handling resize
                 container.setPreferredSize(e.getComponent().getSize());
                 container.revalidate();
                 container.repaint();
@@ -59,36 +57,29 @@ public class ClientUI extends JFrame implements IClientEvents, ICardControls {
 
             @Override
             public void componentMoved(ComponentEvent e) {
-                // System.out.println("Moved to " + e.getComponent().getLocation());
             }
         });
-        
+
         setMinimumSize(new Dimension(400, 400));
-        // centers window
         setLocationRelativeTo(null);
         card = new CardLayout();
         setLayout(card);
-        // menu
+
         menu = new Menu(this);
         this.setJMenuBar(menu);
-        // separate views
+
         csPanel = new ConnectionPanel(this);
         inputPanel = new UserInputPanel(this);
         chatPanel = new ChatPanel(this);
-        
         roomsPanel = new RoomsPanel(this);
 
-
-        // https://stackoverflow.com/a/9093526
-        // this tells the x button what to do (updated to be controlled via a prompt)
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent windowEvent) {
                 int response = JOptionPane.showConfirmDialog(container,
-                "Are you sure you want to close this window?", "Close Window?",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE);
+                        "Are you sure you want to close this window?", "Close Window?",
+                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
                 if (response == JOptionPane.YES_OPTION) {
                     try {
                         Client.INSTANCE.sendDisconnect();
@@ -99,24 +90,40 @@ public class ClientUI extends JFrame implements IClientEvents, ICardControls {
                 }
             }
         });
-        // lastly
-        pack();// tells the window to resize itself and do the layout management
+
+        pack();
         setVisible(true);
     }
-    void findAndSetCurrentPanel(){
-        for (Component c : container.getComponents()) {
+
+    private void highlightUsers(boolean isLastPersonSpeaking) {
+        if (currentCard == Card.CHAT) {
+            chatPanel.highlightUsers(isLastPersonSpeaking);
+        }
+    }
+
+    private void updatePersonColor(long clientId, Color newColor) {
+        if (currentCard == Card.CHAT) {
+            chatPanel.updatePersonColor(clientId, newColor);
+        }
+    }
+
+    void findAndSetCurrentPanel() {
+        Component[] components = container.getComponents();
+        for (int i = 0; i < components.length; i++) {
+            Component c = components[i];
             if (c.isVisible()) {
                 currentCardPanel = (JPanel) c;
                 currentCard = Enum.valueOf(Card.class, currentCardPanel.getName());
-                //if we're not connected don't access anything that requires a connection
-                if(myId == Constants.DEFAULT_CLIENT_ID && currentCard.ordinal() >= Card.CHAT.ordinal()){
+
+                if (myId == Constants.DEFAULT_CLIENT_ID && currentCard.ordinal() >= Card.CHAT.ordinal()) {
                     show(Card.CONNECT.name());
                 }
                 break;
             }
         }
-        System.out.println(currentCardPanel.getName());
+        logger.log(Level.INFO, currentCardPanel.getName());
     }
+
     @Override
     public void next() {
         card.next(container);
@@ -126,7 +133,6 @@ public class ClientUI extends JFrame implements IClientEvents, ICardControls {
     @Override
     public void previous() {
         card.previous(container);
-        
     }
 
     @Override
@@ -147,7 +153,6 @@ public class ClientUI extends JFrame implements IClientEvents, ICardControls {
         int port = csPanel.getPort();
         setTitle(originalTitle + " - " + username);
         Client.INSTANCE.connect(host, port, username, this);
-        //TODO add connecting screen/notice
     }
 
     public static void main(String[] args) {
@@ -162,14 +167,6 @@ public class ClientUI extends JFrame implements IClientEvents, ICardControls {
         return clientName;
     }
 
-    /**
-     * Used to handle new client connects/disconnects or existing client lists (one
-     * by one)
-     * 
-     * @param clientId
-     * @param clientName
-     * @param isConnect
-     */
     private synchronized void processClientConnectionStatus(long clientId, String clientName, boolean isConnect) {
         if (isConnect) {
             if (!userList.containsKey(clientId)) {
