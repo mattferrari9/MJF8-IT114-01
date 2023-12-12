@@ -1,17 +1,15 @@
-package Project.common;
+package CRProject.common;
 
 /**
  * Created so we don't need to modify the base payload
  * to have an unused array 99% of the time
  */
-public class RoomResultPayload extends Payload {
+public class RoomResultPayload extends Payload{
     private String[] rooms;
-
-    public RoomResultPayload() {
+    public RoomResultPayload(){
         super();
         setPayloadType(PayloadType.GET_ROOMS);
     }
-
     /**
      * @return the rooms
      */
