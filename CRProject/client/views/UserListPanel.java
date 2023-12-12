@@ -1,7 +1,7 @@
 package CRProject.client.views;
 
 import java.awt.BorderLayout;
-
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ContainerEvent;
@@ -91,6 +91,15 @@ public class UserListPanel extends JPanel {
                 userListArea.remove(c);
                 break;
             }
+        }
+    }
+
+    protected void updateUserListItem(long clientId) {
+        logger.log(Level.INFO, "removing user list item for id " + clientId);
+        Component [] cs = userListArea.getComponents();
+        for (Component c: cs) {
+            boolean isUser = c.getName().equals(clientId + "");
+            ((JEditorPane) c).setForeground((isUser ? Color.YELLOW : Color.black));
         }
     }
 
