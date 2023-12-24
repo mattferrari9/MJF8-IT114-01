@@ -1,9 +1,7 @@
 package CRProject.client.views;
-
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
+import java.awt.*;
+import java.awt.event.ContainerEvent;
+import java.awt.event.ContainerListener;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -13,8 +11,6 @@ import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
-import java.awt.event.ContainerEvent;
-import java.awt.event.ContainerListener;
 
 import CRProject.client.ClientUtils;
 import CRProject.client.ICardControls;
@@ -114,5 +110,16 @@ public class UserListPanel extends JPanel {
     protected void clearUserList() {
         userListArea.removeAll();
         userItems.clear();
+    }
+
+    // New method to highlight a specific user
+    public void highlightUser(String username) {
+        for (JEditorPane userItem : userItems.values()) {
+            if (userItem.getName().equals(username)) {
+                userItem.setBackground(Color.YELLOW);
+            } else {
+                userItem.setBackground(null);
+            }
+        }
     }
 }

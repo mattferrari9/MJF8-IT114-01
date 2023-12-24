@@ -1,35 +1,24 @@
 package CRProject.client;
 
-import java.awt.CardLayout;
-import java.awt.Color;
-import java.awt.Component; // Import Component
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.*;
+import java.awt.event.*;
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.swing.JFrame;
-import javax.swing.JMenuBar;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 import CRProject.client.views.ChatPanel;
 import CRProject.client.views.ConnectionPanel;
-import CRProject.client.views.Menu;
-import CRProject.client.views.RoomsPanel;
 import CRProject.client.views.UserInputPanel;
+import CRProject.client.views.RoomsPanel;
+import CRProject.client.views.Menu;
 import CRProject.common.Constants;
 
 public class ClientUI extends JFrame implements IClientEvents, ICardControls {
-    CardLayout card;
-    Container container;
-    String originalTitle;
+    private CardLayout card;
+    private Container container;
+    private String originalTitle;
     private static Logger logger = Logger.getLogger(ClientUI.class.getName());
     private JPanel currentCardPanel;
     private Card currentCard;
@@ -95,9 +84,9 @@ public class ClientUI extends JFrame implements IClientEvents, ICardControls {
         setVisible(true);
     }
 
-    private void highlightUsers(boolean isLastPersonSpeaking) {
+    private void highlightLastPersonSpeaking() {
         if (currentCard == Card.CHAT) {
-            chatPanel.highlightUsers(isLastPersonSpeaking);
+            chatPanel.highlightLastPersonSpeaking();
         }
     }
 
@@ -128,6 +117,7 @@ public class ClientUI extends JFrame implements IClientEvents, ICardControls {
     public void next() {
         card.next(container);
         findAndSetCurrentPanel();
+        highlightLastPersonSpeaking();
     }
 
     @Override
@@ -139,6 +129,7 @@ public class ClientUI extends JFrame implements IClientEvents, ICardControls {
     public void show(String cardName) {
         card.show(container, cardName);
         findAndSetCurrentPanel();
+        highlightLastPersonSpeaking();
     }
 
     @Override
@@ -209,6 +200,12 @@ public class ClientUI extends JFrame implements IClientEvents, ICardControls {
         if (currentCard.ordinal() >= Card.CHAT.ordinal()) {
             String clientName = mapClientId(clientId);
             chatPanel.addText(String.format("%s: %s", clientName, message));
+
+            // Example: Determine if the current client is the last person who spoke
+            boolean isLastPersonSpeaking = (clientName.equals(chatPanel.getLastPersonSpeaking()));
+
+            // Call methods in ChatPanel
+            chatPanel.highlightUsers(isLastPersonSpeaking);
         }
     }
 
